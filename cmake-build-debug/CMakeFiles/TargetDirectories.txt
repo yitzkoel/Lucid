@@ -1,0 +1,3 @@
+C:/Users/yitzk/Desktop/c programs/MediaSupervisor/cmake-build-debug/CMakeFiles/MediaSupervisor.dir
+C:/Users/yitzk/Desktop/c programs/MediaSupervisor/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/yitzk/Desktop/c programs/MediaSupervisor/cmake-build-debug/CMakeFiles/rebuild_cache.dir
