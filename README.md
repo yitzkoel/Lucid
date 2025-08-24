@@ -22,7 +22,7 @@ class layeout:
 ├── Manager/
 │   └── Manager.hpp / .cpp
 │
-├── ArticleExtractor/
+├── ArticleScraper/
 │   ├── Extractor.hpp / .cpp
 │   ├── Text.hpp
 │   └── Article.hpp / .cpp
