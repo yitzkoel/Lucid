@@ -63,7 +63,7 @@ namespace ArticalScraper {
 
         //Transparent User-Agent to aprove scrape
         curl_easy_setopt(curl, CURLOPT_USERAGENT,
-            "ArticleScraper/1.0 (Educational Purpose; Contact: yitzkoel@gmail.com)");
+            "ArticleScraper (Educational Purpose; Contact: yitzkoel@gmail.com)");
         curl_easy_setopt(curl, CURLOPT_USERAGENT, "ArticleScraper Educational Tool");
 
         //Setting up the handle
@@ -88,9 +88,9 @@ namespace ArticalScraper {
     const std::string HtmlExtractor::htmlDataExtractor(const std::string& path)
     {
         // first try parse acording t <p> txt <p>
-
+        std::string temp = path + ".temp";
         std::ifstream html_page(path);
-        std::ofstream artical("artical.html");
+        std::ofstream artical(temp);
 
         if(!html_page || !artical)
         {
@@ -103,9 +103,35 @@ namespace ArticalScraper {
         buffer << html_page.rdbuf();
         std::string html = buffer.str();
 
-        // Regex for <p> blocks
-        std::regex pattern("((<p>|<p .*?>)(.*?)</p>)|(<span data-text=\"true\">(.*?)</span>)");
         std::smatch m;
+
+        std::regex author(R"("author": \{[\s\S]*?\})");
+        if(std::regex_search(html, m, author))
+        {
+            artical << m[0] << "\n";
+        }
+
+        std::regex headline(R"("headline": "[\s\S]*?")");
+        if(std::regex_search(html, m, headline))
+        {
+            artical << m[0] << "\n";
+        }
+
+        std::regex date(R"("datePublished": "[\s\S]*?")");
+        if(std::regex_search(html, m, date))
+        {
+            artical << m[0] << "\n";
+        }
+
+        std::regex publisher(R"("publisher": \{[\s\S]*?\})");   //the news media that published
+        if(std::regex_search(html, m, publisher))
+        {
+            artical << m[0] << "\n";
+        }
+
+        // Regex for <p> blocks
+        std::regex pattern(R"(((<p>|<p class="article_speakable">)(.*?)</p>)|(<span data-text="true">(.*?)</span>))");
+
 
         while (std::regex_search(html, m, pattern)) {
             std::string inner_text;
@@ -117,6 +143,21 @@ namespace ArticalScraper {
             html = m.suffix().str();
         }
 
-        return"artical.html";
+        // //ment for testing
+        //  while (std::regex_search(html, m, pattern)) {
+        //      artical << m[0] << "\n";
+        //      html = m.suffix().str();
+        //  }
+
+
+
+
+        if(std::remove(path.c_str()) != 0) {
+            std::cerr << "Error deleting original file\n";
+        }
+        if(std::rename("artical.html", path.c_str()) != 0) {
+            std::cerr << "Error renaming temp file\n";
+        }
+        return path;
     }
 } // ArticalScraper
