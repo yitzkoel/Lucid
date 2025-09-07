@@ -85,8 +85,38 @@ namespace ArticalScraper {
         return filePath;
     }
 
-    const void htmlDataExtractor(const std::string& path)
+    const std::string HtmlExtractor::htmlDataExtractor(const std::string& path)
     {
+        // first try parse acording t <p> txt <p>
 
+        std::ifstream html_page(path);
+        std::ofstream artical("artical.html");
+
+        if(!html_page || !artical)
+        {
+            std::cerr << "Error opening file" << "\n";
+            return"";
+        }
+
+        // Read entire HTML into a string
+        std::ostringstream buffer;
+        buffer << html_page.rdbuf();
+        std::string html = buffer.str();
+
+        // Regex for <p> blocks
+        std::regex pattern("((<p>|<p .*?>)(.*?)</p>)|(<span data-text=\"true\">(.*?)</span>)");
+        std::smatch m;
+
+        while (std::regex_search(html, m, pattern)) {
+            std::string inner_text;
+            if (m[3].matched)        // <p> branch matched
+                inner_text = m[3].str();
+            else if (m[5].matched)   // <span> branch matched
+                inner_text = m[5].str();
+            artical << "<p>" << inner_text << "</p>" << "\n";
+            html = m.suffix().str();
+        }
+
+        return"artical.html";
     }
 } // ArticalScraper

@@ -30,7 +30,7 @@ public:
      * The nessecery text are the artical, name of athor, subject(can be highrarical).
      * @param path
      */
-    const void htmlDataExtractor(const std::string& path);
+    const std::string htmlDataExtractor(const std::string& path);
 
 };
 
