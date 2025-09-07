@@ -1,4 +1,4 @@
-# MediaSuperviser
+# Lucid
 Project goals:
 1. Create summery of israeli news in hebrew.
     features:
