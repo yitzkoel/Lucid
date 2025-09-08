@@ -40,7 +40,7 @@ int test_HtmlExtractor_class(int argc, char* argv[])
 
     try
     {
-        std::string path2 = handle.htmlDataExtractor(path1);
+        std::string path2 = handle.htmlDataExtractorToFile(path1);
         std::cout << "Successfully reformated the html to artical" << std::endl;
         return EXIT_SUCCESS;
     }

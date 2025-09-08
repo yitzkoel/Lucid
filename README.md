@@ -20,13 +20,15 @@ possible class layeout:
 │
 ├── ArticleScraper/    (Util)
 │   ├── HtmlExtractor.hpp / .cpp
-│   └── ArticleDesighn.hpp / .cpp
 │
 │
-├── ArticalDesighner(add the html desigh to the website + uplad featurs to URL that is push command)
+├── ArticleDesigner(add the html design to the website + upload featurs to URL that is push command)
 │
 │
-├── Artical (a optianal class that will be created if further analysys of artical is neede)
+├──ArticalUplaoder(to some URL just a push operation);
+│
+│
+├── Article (a optional class that will be created if further analysys of artical is neede)
 │
 │
 ├── LLMRequester/ (strategy design )

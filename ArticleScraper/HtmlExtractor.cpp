@@ -86,7 +86,41 @@ void addMetaData(const std::string *html,std::ofstream *artical )
 
     // Close meta data JSON header
     *artical << "}</script>";
+}
 
+void addMetaData(const std::string *html,ArticalProcessing::Artical &artical )
+{
+    std::smatch m;
+
+    // Add link to page
+    artical.set_URLlink( (*html).substr(0, (*html).find('\n')));
+
+    std::regex author(R"("author": \{[\s\S]*?\})");
+    if(std::regex_search(*html, m, author))
+    {
+        artical.set_name_of_auther(m[0]);
+    }
+
+    // Add headline
+    std::regex headline(R"("headline": "[\s\S]*?")");
+    if(std::regex_search(*html, m, headline))
+    {
+        artical.set_headline( m[0]);
+    }
+
+    //Add Publishing date
+    std::regex date(R"("datePublished": "[\s\S]*?")");
+    if(std::regex_search(*html, m, date))
+    {
+        artical.set_publish_date(m[0]);
+    }
+
+    // Add publisher data
+    std::regex publisher(R"("publisher": \{[\s\S]*?\})");   //the news media that published
+    if(std::regex_search(*html, m, publisher))
+    {
+        artical.set_publisher_data(m[0]);
+    }
 }
 
 
@@ -139,7 +173,7 @@ namespace ArticalScraper {
         return filePath;
     }
 
-    const std::string HtmlExtractor::htmlDataExtractor(const std::string& path)
+    const std::string HtmlExtractor::htmlDataExtractorToFile(const std::string& path)
     {
         std::string temp = path + ".temp";
         std::ifstream html_page(path);
@@ -189,5 +223,49 @@ namespace ArticalScraper {
             throw std::ios_base::failure("Error renaming temp file");
         }
         return path;
+    }
+
+    ArticalProcessing::Artical& HtmlExtractor::htmlDataExtractorToArtical(const std::string& path)
+    {
+        auto *artical = new ArticalProcessing::Artical();
+        std::ifstream html_page(path);
+
+        if(!html_page)
+        {
+            throw std::ios_base::failure("Failed to open file for writing: ");
+        }
+
+        // Read entire HTML into a string
+        std::ostringstream buffer;
+        buffer << html_page.rdbuf();
+        std::string html = buffer.str();
+
+        //Add metadata in JSON to artical
+        addMetaData(&html, *artical);
+
+        // Regex for main artical text blocks
+        std::smatch m;
+        std::regex pattern(R"(((<p>|<p class="article_speakable">)(.*?)</p>)|(<span data-text="true">(.*?)</span>))");
+
+
+        while (std::regex_search(html, m, pattern)) {
+            std::string inner_text;
+            if (m[3].matched)        // <p> branch matched
+                inner_text = m[3].str();
+            else if (m[5].matched)   // <span> branch matched
+                inner_text = m[5].str();
+            artical->addToArticalText(inner_text + "\n");
+            html = m.suffix().str();
+        }
+
+        // //ment for testing
+        //  while (std::regex_search(html, m, pattern)) {
+        //      artical << m[0] << "\n";
+        //      html = m.suffix().str();
+        //  }
+
+        //safe close and renaming of reformated artical
+        html_page.close();
+        return *artical;
     }
 } // ArticalScraper

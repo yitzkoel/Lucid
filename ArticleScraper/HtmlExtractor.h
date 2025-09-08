@@ -10,6 +10,8 @@
 #include <iostream>
 #include <fstream>
 
+#include "../ArticalProcessing/Artical.h"
+
 namespace ArticalScraper
 {
     class HtmlExtractor
@@ -38,7 +40,9 @@ namespace ArticalScraper
          * @param path  the path to the downlaoded html file.
          * @return A path to the reformated file please note that it is the same path as the input path.
          */
-        const std::string htmlDataExtractor(const std::string& path);
+        const std::string htmlDataExtractorToFile(const std::string& path);
+        ArticalProcessing::Artical& htmlDataExtractorToArtical(const std::string& path);
+
     };
 } // ArticalScraper
 
