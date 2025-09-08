@@ -4,6 +4,11 @@
 
 #include "HtmlExtractor.h"
 
+/**
+ *  This method replaces all problomatic chars in a URL path so it will be able to be used as a file path in windows.
+ * @param path the URL.
+ * @return a URL that can be used as a path in windows OS (and any other).
+ */
 std::string convet_URL_to_valid_path(const std::string& path)
 {
     std::regex protocol("^https?://");
@@ -33,6 +38,58 @@ bool isValidURL_Regex(const std::string& path)
 }
 
 
+/**
+ * This method adds the fallowing metadata from the oroginal URL html page:
+ * Link to page.
+ * Name of author.
+ * Headline.
+ * Publish date.
+ * Publisher information.
+ * @param html  the oroginal URL html page.
+ * @param artical the file to add to the meta data.
+ */
+void addMetaData(const std::string *html,std::ofstream *artical )
+{
+    // Adding the header to JSON meta data
+    *artical << "<script type=\"application/ld+json\">\n{";
+    std::smatch m;
+
+    // Add link to page
+    *artical << (*html).substr(0, (*html).find('\n'));
+
+    std::regex author(R"("author": \{[\s\S]*?\})");
+    if(std::regex_search(*html, m, author))
+    {
+        *artical << m[0] << "\n";
+    }
+
+    // Add headline
+    std::regex headline(R"("headline": "[\s\S]*?")");
+    if(std::regex_search(*html, m, headline))
+    {
+        *artical << m[0] << "\n";
+    }
+
+    //Add Publishing date
+    std::regex date(R"("datePublished": "[\s\S]*?")");
+    if(std::regex_search(*html, m, date))
+    {
+        *artical << m[0] << "\n";
+    }
+
+    // Add publisher data
+    std::regex publisher(R"("publisher": \{[\s\S]*?\})");   //the news media that published
+    if(std::regex_search(*html, m, publisher))
+    {
+        *artical << m[0] << "\n";
+    }
+
+    // Close meta data JSON header
+    *artical << "}</script>";
+
+}
+
+
 
 namespace ArticalScraper {
     const std::string HtmlExtractor::websiteDownloader(const std::string& path)
@@ -40,14 +97,12 @@ namespace ArticalScraper {
         CURL* curl = curl_easy_init();
         if(!curl)
         {
-            std::cerr << "failed to initialize curl" << "\n";
-            return "";
+            throw std::runtime_error("failed to initialize curl");
         }
 
         if(!isValidURL_Regex(path))
         {
-            std::cerr << "URL must include http or https prefix" << "\n";
-            return "";
+            throw std::invalid_argument("URL must include http or https prefix");
         }
 
 
@@ -56,15 +111,16 @@ namespace ArticalScraper {
 
         if(!file)
         {
-            std::cerr << "Failed to open file for writing: " << filePath << std::endl;
-            curl_easy_cleanup(curl);
-            return "";
+            throw std::ios_base::failure("Failed to open file for writing: " + filePath);
         }
+
+        //write link to file to use later
+        std::string link =  "<a href= " + path +">link to full website artical</a>\n";
+        fputs(link.c_str(), file);
 
         //Transparent User-Agent to aprove scrape
         curl_easy_setopt(curl, CURLOPT_USERAGENT,
-            "ArticleScraper (Educational Purpose; Contact: yitzkoel@gmail.com)");
-        curl_easy_setopt(curl, CURLOPT_USERAGENT, "ArticleScraper Educational Tool");
+            "ArticleLooker (Educational Purpose; Contact: yitzkoel@gmail.com)");
 
         //Setting up the handle
         curl_easy_setopt(curl,CURLOPT_URL, path.c_str());
@@ -74,9 +130,7 @@ namespace ArticalScraper {
 
         if(result != CURLE_OK)
         {
-            std::cerr << "CURL error: " << curl_easy_strerror(result) << std::endl;
-            std::cerr << "Failed to download from: " << path << std::endl;
-            return "";
+            throw std::runtime_error("CURL error: Failed to download from "+path);
         }
 
         curl_easy_cleanup(curl);
@@ -87,15 +141,13 @@ namespace ArticalScraper {
 
     const std::string HtmlExtractor::htmlDataExtractor(const std::string& path)
     {
-        // first try parse acording t <p> txt <p>
         std::string temp = path + ".temp";
         std::ifstream html_page(path);
         std::ofstream artical(temp);
 
         if(!html_page || !artical)
         {
-            std::cerr << "Error opening file" << "\n";
-            return"";
+            throw std::ios_base::failure("Failed to open file for writing: ");
         }
 
         // Read entire HTML into a string
@@ -103,33 +155,11 @@ namespace ArticalScraper {
         buffer << html_page.rdbuf();
         std::string html = buffer.str();
 
+        //Add metadata in JSON to artical
+        addMetaData(&html, &artical);
+
+        // Regex for main artical text blocks
         std::smatch m;
-
-        std::regex author(R"("author": \{[\s\S]*?\})");
-        if(std::regex_search(html, m, author))
-        {
-            artical << m[0] << "\n";
-        }
-
-        std::regex headline(R"("headline": "[\s\S]*?")");
-        if(std::regex_search(html, m, headline))
-        {
-            artical << m[0] << "\n";
-        }
-
-        std::regex date(R"("datePublished": "[\s\S]*?")");
-        if(std::regex_search(html, m, date))
-        {
-            artical << m[0] << "\n";
-        }
-
-        std::regex publisher(R"("publisher": \{[\s\S]*?\})");   //the news media that published
-        if(std::regex_search(html, m, publisher))
-        {
-            artical << m[0] << "\n";
-        }
-
-        // Regex for <p> blocks
         std::regex pattern(R"(((<p>|<p class="article_speakable">)(.*?)</p>)|(<span data-text="true">(.*?)</span>))");
 
 
@@ -148,15 +178,15 @@ namespace ArticalScraper {
         //      artical << m[0] << "\n";
         //      html = m.suffix().str();
         //  }
-
-
-
-
+        
+        //safe close and renaming of reformated artical
+        html_page.close();
+        artical.close();
         if(std::remove(path.c_str()) != 0) {
-            std::cerr << "Error deleting original file\n";
+            throw std::ios_base::failure("Error deleting original file");
         }
-        if(std::rename("artical.html", path.c_str()) != 0) {
-            std::cerr << "Error renaming temp file\n";
+        if(std::rename(temp.c_str(), path.c_str()) != 0) {
+            throw std::ios_base::failure("Error renaming temp file");
         }
         return path;
     }
