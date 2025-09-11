@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+
+<html lang="{{language}}" dir="{{direction}}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucid page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+        header, nav, main, aside, footer {
+            padding: 20px;
+        }
+        header {
+            background: #8A9560;
+            color: white;
+            text-align: center;
+        }
+        nav {
+            background: #eee;
+        }
+        main {
+            background: #f9f9f9;
+            min-height: 300px;
+            padding: 20px;
+        }
+        aside {
+            background: #ddd;
+            padding: 20px;
+        }
+        footer {
+            background: #333;
+            color: white;
+            text-align: center;
+        }
+        .container {
+            display: flex;
+        }
+        .content {
+            flex: 3;
+        }
+        .sidebar {
+            flex: 1;
+        }
+		/* Links in your header */
+		header a {
+			color: #E6C85F; 
+			text-decoration: underline; 
+		}
+
+		/* hover effect */
+		header a:hover {
+			color: #FFD966; /* slightly brighter on hover */
+		}
+    </style>
+</head>
+
+
+<body>
+
+    <header>
+        <h1>{{title}}</h1>
+
+        <!-- Store ISO time in datetime, human-readable will be filled by JS -->
+        <p><time datetime="{{publishTime}}" id="publish-time"></time></p>
+
+        <p><span class="author">{{author name}}</span></p>
+        <p><a href="{{URLlink}}">link to full website article</a></p>
+    </header>
+
+    <div class="container">
+        <main class="content">
+            {{articalText}}
+        </main>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Lucid generated | All rights reserved to the article source</p>
+    </footer>
+
+    <!-- JS to convert ISO time to human-readable -->
+    <script>
+        const timeElem = document.getElementById("publish-time");
+        const isoTime = timeElem.getAttribute("datetime");  // e.g. "2025-09-11T08:21:00+02:00"
+        const date = new Date(isoTime);                     // JS parses ISO 8601
+        // Format human-readable (dd/mm/yyyy hh:mm)
+        const options = {
+            year: 'numeric', month: '2-digit', day: '2-digit',
+            hour: '2-digit', minute: '2-digit', hour12: false
+        };
+        timeElem.textContent = date.toLocaleString(undefined, options);
+    </script>
+	
+	
+
+</body>
+
+</html>

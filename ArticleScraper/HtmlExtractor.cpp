@@ -4,6 +4,7 @@
 
 #include "HtmlExtractor.h"
 
+# define MAX_PATH_LENGTH 95
 /**
  *  This method replaces all problomatic chars in a URL path so it will be able to be used as a file path in windows.
  * @param path the URL.
@@ -12,7 +13,7 @@
 std::string convet_URL_to_valid_path(const std::string& path)
 {
     std::regex protocol("^https?://");
-    std::regex invalid_chars(R"([/:*?"<>|\\])");  // All problematic characters
+    std::regex invalid_chars(R"([%/:*?"<>|\\])");  // All problematic characters
 
     std::string augmentedString = std::regex_replace(path, protocol,"");
     augmentedString = std::regex_replace(augmentedString, invalid_chars, "_");
@@ -21,7 +22,11 @@ std::string convet_URL_to_valid_path(const std::string& path)
     std::regex multiple_underscores("_+");
     augmentedString = std::regex_replace(augmentedString, multiple_underscores, "_");
 
-
+    if(augmentedString.length() > MAX_PATH_LENGTH)
+    {
+        augmentedString = augmentedString.substr(0,MAX_PATH_LENGTH);
+    }
+    
     return augmentedString + ".html";
 }
 
@@ -55,7 +60,7 @@ void addMetaData(const std::string *html,std::ofstream *artical )
     std::smatch m;
 
     // Add link to page
-    *artical << (*html).substr(0, (*html).find('\n'));
+    *artical << "<a href= " + (*html).substr(0, (*html).find('\n')) +">link to full website artical</a>\n";
 
     std::regex author(R"("author": \{[\s\S]*?\})");
     if(std::regex_search(*html, m, author))
@@ -95,24 +100,28 @@ void addMetaData(const std::string *html,ArticalProcessing::Artical &artical )
     // Add link to page
     artical.set_URLlink( (*html).substr(0, (*html).find('\n')));
 
-    std::regex author(R"("author": \{[\s\S]*?\})");
+    //std::regex author(R"("author": \{[\s\S]*?\})");
+    //std::regex author(R"("author":\s*\{[\s\S]*?"name":\s*?"([\s\S]*?)"[\\s\\S]*?\})");
+    std::regex author("\"author\":\\s*\\{[\\s\\S]*?\"name\":\\s*?\"([^\"]*)\"[\\s\\S]*?\\}");
+
     if(std::regex_search(*html, m, author))
     {
-        artical.set_name_of_auther(m[0]);
+        artical.set_name_of_auther(m[1]);
     }
 
     // Add headline
-    std::regex headline(R"("headline": "[\s\S]*?")");
+    //std::regex headline("\"headline\":\\s*?\"([\\s\\S]*?)\",");
+    std::regex headline("<title[\\s\\S]*?>([\\s\\S]*?)</title>");
     if(std::regex_search(*html, m, headline))
     {
-        artical.set_headline( m[0]);
+        artical.set_headline( m[1]);
     }
 
     //Add Publishing date
-    std::regex date(R"("datePublished": "[\s\S]*?")");
+    std::regex date("\"datePublished\":\\s*?\"([\\s\\S]*?)\"");
     if(std::regex_search(*html, m, date))
     {
-        artical.set_publish_date(m[0]);
+        artical.set_publish_date(m[1]);
     }
 
     // Add publisher data
@@ -149,7 +158,7 @@ namespace ArticalScraper {
         }
 
         //write link to file to use later
-        std::string link =  "<a href= " + path +">link to full website artical</a>\n";
+        std::string link =path + "\n";
         fputs(link.c_str(), file);
 
         //Transparent User-Agent to aprove scrape

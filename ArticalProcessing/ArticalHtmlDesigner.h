@@ -44,12 +44,7 @@ namespace ArticalProcessing {
         [[nodiscard]] std::string name() const {return this->name_;}
     };
 
-    // creating the const objects for Direction and Language.
-    const Language Language::EN = Language("en");
-    const Language Language::HEB = Language("he");
 
-    const Dir Dir::LTR = Dir("ltr");
-    const Dir Dir::RTL = Dir("rtl");
 
 
     /**
