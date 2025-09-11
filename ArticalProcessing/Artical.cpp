@@ -5,8 +5,9 @@
 #include "Artical.h"
 
 namespace ArticalProcessing {
-    void Artical::addToArticalText(std::string text)
+    void Artical::addTextToArtical(const std::string& text)
     {
-        this->set_articla_text(this->getArticleText() + text);
+        this->set_article_text(this->getArticleText() + text);
     }
+
 } // ArticalProccessing

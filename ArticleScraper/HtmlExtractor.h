@@ -23,7 +23,7 @@ namespace ArticalScraper
          * @param path A path to the website that holds the artical.
          * @return A path to a local directory that holds the articals html, returns empty string if fail.
          */
-        const std::string websiteDownloader(const std::string& path);
+        static std::string websiteDownloader(const std::string& path);
 
         /**
          * This methods recieves a raw html in a txt file of a artical and removes all unessecery text.
@@ -40,8 +40,8 @@ namespace ArticalScraper
          * @param path  the path to the downlaoded html file.
          * @return A path to the reformated file please note that it is the same path as the input path.
          */
-        const std::string htmlDataExtractorToFile(const std::string& path);
-        ArticalProcessing::Artical& htmlDataExtractorToArtical(const std::string& path);
+        static std::string htmlDataExtractorToFile(const std::string& path);
+        static ArticalProcessing::Artical& htmlDataExtractorToArtical(const std::string& path);
 
     };
 } // ArticalScraper

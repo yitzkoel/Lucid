@@ -126,7 +126,7 @@ void addMetaData(const std::string *html,ArticalProcessing::Artical &artical )
 
 
 namespace ArticalScraper {
-    const std::string HtmlExtractor::websiteDownloader(const std::string& path)
+    std::string HtmlExtractor::websiteDownloader(const std::string& path)
     {
         CURL* curl = curl_easy_init();
         if(!curl)
@@ -173,7 +173,7 @@ namespace ArticalScraper {
         return filePath;
     }
 
-    const std::string HtmlExtractor::htmlDataExtractorToFile(const std::string& path)
+    std::string HtmlExtractor::htmlDataExtractorToFile(const std::string& path)
     {
         std::string temp = path + ".temp";
         std::ifstream html_page(path);
@@ -254,15 +254,9 @@ namespace ArticalScraper {
                 inner_text = m[3].str();
             else if (m[5].matched)   // <span> branch matched
                 inner_text = m[5].str();
-            artical->addToArticalText(inner_text + "\n");
+            artical->addTextToArtical("<p>" + inner_text + "</p>");
             html = m.suffix().str();
         }
-
-        // //ment for testing
-        //  while (std::regex_search(html, m, pattern)) {
-        //      artical << m[0] << "\n";
-        //      html = m.suffix().str();
-        //  }
 
         //safe close and renaming of reformated artical
         html_page.close();

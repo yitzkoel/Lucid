@@ -5,12 +5,11 @@
 
 int test_HtmlExtractor_class(int argc, char* argv[])
 {
-    ArticalScraper::HtmlExtractor handle;
     std::string path1;
     if (argc != 2) return EXIT_FAILURE;
     try
     {
-        path1 = handle.websiteDownloader(argv[1]);
+        path1 = ArticalScraper::HtmlExtractor::websiteDownloader(argv[1]);
         std::cout << "Successfully downloaded to: " << path1 << std::endl;
     }
     catch (const std::invalid_argument& e)
@@ -40,7 +39,7 @@ int test_HtmlExtractor_class(int argc, char* argv[])
 
     try
     {
-        std::string path2 = handle.htmlDataExtractorToFile(path1);
+        std::string path2 = ArticalScraper::HtmlExtractor::htmlDataExtractorToFile(path1);
         std::cout << "Successfully reformated the html to artical" << std::endl;
         return EXIT_SUCCESS;
     }

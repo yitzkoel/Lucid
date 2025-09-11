@@ -7,31 +7,36 @@
 #include <string>
 
 namespace ArticalProcessing {
-
+    /**
+     * This class represents a Article.
+     * It holds fields of the atrbutes of an artical and getters and setters.
+     */
     class Artical {
-    private:
-        std::string URLlink;
-        std::string nameOfAuther;
-        std::string headline;
-        std::string publishDate;
-        std::string publisherData;
-        std::string articlaText;
 
     public:
-        // Parameterized constructor
+        //
+        /**
+         * Parameterized constructor
+         * @param URLlink The link to the artical website source.
+         * @param nameOfAuther The name of the artical's author.
+         * @param headline The name of the artical's headline.
+         * @param publishDate Date and time of publish.
+         * @param publisherData Data about the publishers.
+         * @param articleText The artical itself.
+         */
         Artical(
             std::string& URLlink,
             std::string& nameOfAuther,
             std::string& headline,
             std::string& publishDate,
             std::string& publisherData,
-            std::string& articlaText ) :
+            std::string& articleText ) :
             URLlink(URLlink),
             nameOfAuther(nameOfAuther),
             headline(headline),
             publishDate(publishDate),
             publisherData(publisherData),
-            articlaText(articlaText) {}
+            articleText(articleText) {}
 
         // default constructor
         Artical() = default;
@@ -42,19 +47,29 @@ namespace ArticalProcessing {
         void set_headline(const std::string& headline) {this->headline = headline;}
         void set_publish_date(const std::string& publish_date) {publishDate = publish_date;}
         void set_publisher_data(const std::string& publisher_data) {publisherData = publisher_data;}
-        void set_articla_text(const std::string& articla_text) {articlaText = articla_text;}
+        void set_article_text(const std::string& article_text) {articleText = article_text;}
 
         // getters
-        const std::string& getURLlink() const { return URLlink; }
-        const std::string& getAuthor() const { return nameOfAuther; }
-        const std::string& getHeadline() const { return headline; }
-        const std::string& getPublishDate() const { return publishDate; }
-        const std::string& getPublisherData() const { return publisherData; }
-        const std::string& getArticleText() const { return articlaText; }
+        [[nodiscard]] const std::string& getURLlink() const { return URLlink; }
+        [[nodiscard]] const std::string& getAuthor() const { return nameOfAuther; }
+        [[nodiscard]] const std::string& getHeadline() const { return headline; }
+        [[nodiscard]] const std::string& getPublishDate() const { return publishDate; }
+        [[nodiscard]] const std::string& getPublisherData() const { return publisherData; }
+        [[nodiscard]] const std::string& getArticleText() const { return articleText; }
 
-        void addToArticalText(std::string text);
+        /**
+         * This method lets you add more text to the artical dynamicly.
+         * @param text The text to be added to the artical.
+         */
+        void addTextToArtical(const std::string& text);
 
-
+    private:
+        std::string URLlink;
+        std::string nameOfAuther;
+        std::string headline;
+        std::string publishDate;
+        std::string publisherData;
+        std::string articleText;
     };
 
 } // ArticalProccessing
