@@ -9,6 +9,7 @@
 #include <curl/curl.h>
 #include <iostream>
 #include <fstream>
+#include <memory>
 
 #include "../ArticalProcessing/Artical.h"
 
@@ -41,7 +42,9 @@ namespace ArticalScraper
          * @return A path to the reformated file please note that it is the same path as the input path.
          */
         static std::string htmlDataExtractorToFile(const std::string& path);
-        static ArticalProcessing::Artical& htmlDataExtractorToArtical(const std::string& path);
+
+        
+        static std::unique_ptr<ArticalProcessing::Artical> htmlDataExtractorToArtical(const std::string& path);
 
     };
 } // ArticalScraper

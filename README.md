@@ -52,7 +52,7 @@ subject, actual article text, and anything other that is needed.
 **still need to think about the design.**
 create a LLMRequester folder and in it:
 create question Object subclass of text.
-maby a bunch of different question types and a factory to create them
+maby a bunch of different question types and a factory to create them(maby like enums that hold prompts)
 create a Requester class that has a method that gets a list of text objects,
 a question object and runs the LLM accordingly and saves the answer in a text Object.
 **still need to think about the design.**
@@ -60,4 +60,10 @@ a question object and runs the LLM accordingly and saves the answer in a text Ob
 creat a Manager that can mange all the features classes
 basiclly the manager will be a handle that can create mult articals can downlaod html proccess them, desighn them() etc.
 add a shell class that will take care of shell user interface. 
+
+
+
+Ideas:
+1. add to LLM client the ability to control the number of words per response and tempture.
+2. add the ability to recieve and send to a local server LLM (llama for example).
 

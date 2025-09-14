@@ -1,10 +1,17 @@
 #include <iostream>
 #include <string>
 #include <curl/curl.h>
+#include <memory>
+#include <io.h>
+#include <fcntl.h>
+#include <iostream>
 
 #include "ArticalProcessing/ArticalHtmlDesigner.h"
 #include "ArticleScraper/HtmlExtractor.h"
+#include "LLM/client.h"
 
+#define REQUEST1 "The following article is in hebrew. Critically analyze this article for logical errors, biases, and validity"\
+"of arguments, in neutral, unbiased language. Organize for readability. Respond in the same language as the article.";
 
 std::string activate_artical_downlaoder(int argc, char* argv[]){
     std::string path1;
@@ -75,19 +82,19 @@ int activate_artical_extractor_to_file(const std::string &path)
 
 }
 
-ArticalProcessing::Artical* activate_artical_extractor_to_Artical(const std::string &path)
+std::unique_ptr<ArticalProcessing::Artical> activate_artical_extractor_to_Artical(const std::string &path)
 {
-    ArticalProcessing::Artical *artical = nullptr;
+    std::unique_ptr<ArticalProcessing::Artical> artical = nullptr;
     try
     {
-         artical = &ArticalScraper::HtmlExtractor::htmlDataExtractorToArtical(path);
+         artical = ArticalScraper::HtmlExtractor::htmlDataExtractorToArtical(path);
          std::cout << "successfully extracted" + path + " to Artical Object\n";
     }
     catch (const std::ios_base::failure& e)
     {
         std::cerr << e.what() << "\n";
     }
-    return artical;
+    return std::move(artical);
 }
 
 int test_HtmlExtractor_class(int argc, char* argv[])
@@ -117,7 +124,7 @@ int test_HtmlExtracor_and_designer(int argc, char* argv[])
     std::string path1;
     path1 = activate_artical_downlaoder(argc, argv);
 
-    ArticalProcessing::Artical *artical = activate_artical_extractor_to_Artical(path1);
+    std::unique_ptr<ArticalProcessing::Artical> artical = activate_artical_extractor_to_Artical(path1);
     if(!artical)
     {
         return EXIT_FAILURE;
@@ -137,11 +144,98 @@ int test_HtmlExtracor_and_designer(int argc, char* argv[])
     }
 }
 
+int test_Basic_LLM_client(int argc, char* argv[])
+{
+    if (argc < 2)
+    {
+        std::cerr << "Wrong number of arguments, can accept 2 only.";
+        return EXIT_FAILURE;
+    }
+    const char* key_cstr = std::getenv("OPENAI_API_KEY");
+    if (key_cstr == nullptr) {
+        std::cerr << "API key not found in environment variables." << std::endl;
+        return EXIT_FAILURE;
+    }
+    std::string key(key_cstr);;
+    LLM::client clnt(key);
 
+    try
+    {
+        std::string request;
+        for(int i = 1; i < argc; i++)
+        {
+          request.append(argv[i]);
+            request.append(" ");
+        }
+        std::cout << clnt.getResponse(request);
+        return EXIT_SUCCESS;
+    }
+    catch (std::runtime_error& e)
+    {
+        std::cout << "failed to generate LLM response" << e.what() << std::endl;
+        return EXIT_FAILURE;
+    }
+
+}
+
+
+
+int test_LLM_response_To_Article(int argc, char* argv[])
+{
+    if (argc < 2)
+    {
+        std::cerr << "Wrong number of arguments, can accept 2 only.";
+        return EXIT_FAILURE;
+    }
+
+    std::string path1;
+    path1 = activate_artical_downlaoder(argc, argv);
+
+    std::unique_ptr<ArticalProcessing::Artical> artical = activate_artical_extractor_to_Artical(path1);
+    if(!artical)
+    {
+        return EXIT_FAILURE;
+    }
+
+    std::string articalTxt = artical->getArticleText();
+
+    std::string key(LLM_KEY);
+    LLM::client clnt(key);
+
+    try
+    {
+        std::string request;
+        for(int i = 2; i < argc; i++)
+        {
+            request.append(argv[i]);
+            request.append(" ");
+        }
+        request.append(articalTxt);
+
+        // Convert UTF-8 string to wstring for wcout
+        std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+        std::wstring wideResponse = converter.from_bytes(clnt.getResponse(request));
+
+        std::wcout << wideResponse << std::endl;
+        return EXIT_SUCCESS;
+    }
+    catch (std::runtime_error& e)
+    {
+        std::cerr << "Failed to generate LLM response: " << e.what() << std::endl;
+        return EXIT_FAILURE;
+    }
+}
 
 int main(int argc, char* argv[])
 {
-  //return test_HtmlExtractor_class(argc, argv);
-  return test_HtmlExtracor_and_designer(argc,argv);
+    //return test_HtmlExtractor_class(argc, argv);
+    //return test_HtmlExtracor_and_designer(argc,argv);
+
+    return test_Basic_LLM_client(argc, argv);
+
+    // // Set console to UTF-8 output
+    // _setmode(_fileno(stdout), _O_U8TEXT);
+    //
+    // return test_LLM_response_To_Article(argc, argv);
 }
 

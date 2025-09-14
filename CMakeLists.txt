@@ -21,6 +21,9 @@ add_executable(Lucid
         ArticalProcessing/ArticalHtmlDesigner.h
         ArticalProcessing/Artical.cpp
         ArticalProcessing/Artical.h
+        LLM/client.cpp
+        LLM/client.h
+        LLM/client.h
 )
 
 # Link libcurl

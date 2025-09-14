@@ -145,6 +145,7 @@ namespace ArticalScraper {
 
         if(!isValidURL_Regex(path))
         {
+            curl_easy_cleanup(curl);
             throw std::invalid_argument("URL must include http or https prefix");
         }
 
@@ -154,6 +155,7 @@ namespace ArticalScraper {
 
         if(!file)
         {
+            curl_easy_cleanup(curl);
             throw std::ios_base::failure("Failed to open file for writing: " + filePath);
         }
 
@@ -173,6 +175,8 @@ namespace ArticalScraper {
 
         if(result != CURLE_OK)
         {
+            curl_easy_cleanup(curl);
+            fclose(file);
             throw std::runtime_error("CURL error: Failed to download from "+path);
         }
 
@@ -216,12 +220,6 @@ namespace ArticalScraper {
             html = m.suffix().str();
         }
 
-        // //ment for testing
-        //  while (std::regex_search(html, m, pattern)) {
-        //      artical << m[0] << "\n";
-        //      html = m.suffix().str();
-        //  }
-        
         //safe close and renaming of reformated artical
         html_page.close();
         artical.close();
@@ -234,9 +232,9 @@ namespace ArticalScraper {
         return path;
     }
 
-    ArticalProcessing::Artical& HtmlExtractor::htmlDataExtractorToArtical(const std::string& path)
+    std::unique_ptr<ArticalProcessing::Artical> HtmlExtractor::htmlDataExtractorToArtical(const std::string& path)
     {
-        auto *artical = new ArticalProcessing::Artical();
+        auto artical = std::make_unique<ArticalProcessing::Artical>();
         std::ifstream html_page(path);
 
         if(!html_page)
@@ -269,6 +267,6 @@ namespace ArticalScraper {
 
         //safe close and renaming of reformated artical
         html_page.close();
-        return *artical;
+        return std::move(artical);
     }
 } // ArticalScraper
