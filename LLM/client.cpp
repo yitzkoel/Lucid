@@ -99,6 +99,8 @@ namespace LLM {
         // Set callback response
         curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, write_callback);
         curl_easy_setopt(curl_, CURLOPT_WRITEDATA, &bufferResponse_);
+
+        curl_easy_setopt(curl_, CURLOPT_SSL_OPTIONS, CURLSSLOPT_NATIVE_CA);
     }
 
 } // LLM

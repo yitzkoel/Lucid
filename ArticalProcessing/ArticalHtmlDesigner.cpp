@@ -7,16 +7,8 @@
 #include <utility>
 
 # define MAX_PATH_LENGTH 95
+# define HTML_TEMPLATE_PATH "articalTemplateHtml.txt"
 
-
-std::string replaceAll(std::string& str, const std::string& from, const std::string& to) {
-    size_t startPos = 0;
-    while((startPos = str.find(from, startPos)) != std::string::npos) {
-        str.replace(startPos, from.length(), to);
-        startPos += to.length();
-    }
-    return str;
-}
 
 namespace ArticalProcessing {
 
@@ -35,8 +27,10 @@ namespace ArticalProcessing {
     URLlink_(false),
     articleText_(false),
     author_(false),
+    LLMRequests_(false),
     dir_(Dir::RTL),
     lng_(Language::HEB)
+
         {
             articalPath_ = generatePath(this->artical_.getURLlink());
         }
@@ -55,7 +49,7 @@ namespace ArticalProcessing {
 
     void ArticalHtmlDesigner::addAuthor(){author_ = true;}
 
-
+    void ArticalHtmlDesigner::addLLMRequests(){LLMRequests_ = true;}
 
 
     void ArticalHtmlDesigner::setPath(std::string& path){articalPath_ = path;}
@@ -70,63 +64,70 @@ namespace ArticalProcessing {
 
 
 
-    std::string ArticalHtmlDesigner::generateHtmlFile() const
+    std::string ArticalHtmlDesigner::generateHtmlFile()
     {
         // Open files to read and write.
         std::ofstream htmlArtical(articalPath_);
-        std::ifstream htmlTemplateFile("articalTemplateHtml.txt");
-        if(!htmlArtical || htmlTemplateFile)
+        std::ifstream htmlTemplateFile(HTML_TEMPLATE_PATH);
+        if(!htmlArtical || !htmlTemplateFile)
         {
             throw std::ios_base::failure("Failed to open file for writing: ");
         }
 
-        // Read the template into a buffer and into a string.
+        // create buffer to create the file
+        std::vector<std::string> htmlArticalBuffer;
+
+        //Read the template into a buffer and into a string.
         std::stringstream buffer;
         buffer <<  htmlTemplateFile.rdbuf();
-        std::string htmlTemplate = buffer.str();
 
-        // Add language and direction.
-        htmlTemplate = replaceAll(htmlTemplate, "{{language}}", lng_.name());
-        htmlTemplate = replaceAll(htmlTemplate, "{{direction}}", dir_.name());
-
-        // Add title
-        if(title_)
+        std::string line;
+        std::string llmRequests = createRequests();
+        while (std::getline(buffer, line))
         {
-            htmlTemplate = replaceAll(htmlTemplate, "{{title}}", artical_.getHeadline());
+            if(addTemplate(line,"{{language}}", true,
+                lng_.name(), htmlArticalBuffer))
+            {
+                htmlArticalBuffer.pop_back();
+                addTemplate(line,"{{direction}}", true,
+                dir_.name(), htmlArticalBuffer);
+                continue;
+            }
+
+            if(addTemplate(line, "{{title}}",title_,
+                artical_.getHeadline(), htmlArticalBuffer)) continue;
+
+            if(addTemplate(line, "{{publishTime}}",publishTime_,
+                artical_.getPublishDate(), htmlArticalBuffer)) continue;
+
+            if(addTemplate(line, "{{author}}",author_,
+                artical_.getAuthor(), htmlArticalBuffer)) continue;
+
+            if(addTemplate(line, "{{URLlink}}",URLlink_,
+                artical_.getURLlink(), htmlArticalBuffer)) continue;
+
+            if(addTemplate(line, "{{articalText}}",articleText_,
+                artical_.getArticleText(), htmlArticalBuffer)) continue;
+
+            if(addTemplate(line, "{{LLM answers}}",LLMRequests_,
+                llmRequests, htmlArticalBuffer)) continue;
+
+            htmlArticalBuffer.push_back(line + "\n");
         }
-
-        // Add publish time
-        if(publishTime_)
-        {
-            htmlTemplate = replaceAll(htmlTemplate, "{{publishTime}}", artical_.getPublishDate());
-        }
-
-        // Add author's name.
-        if(author_)
-        {
-            htmlTemplate = replaceAll(htmlTemplate, "{{author}}", artical_.getAuthor());
-        }
-
-        // Add url link.
-        if(URLlink_)
-        {
-            htmlTemplate = replaceAll(htmlTemplate, "{{URLlink}}", artical_.getURLlink());
-        }
-
-        // Add articals text.
-        if(articleText_)
-        {
-            htmlTemplate = replaceAll(htmlTemplate, "{{articalText}}", artical_.getArticleText());
-        }
-
-        // Copy the generated file into the html artical file.
-        htmlArtical << htmlTemplate;
-
-        // Return path to artical.
-        return  articalPath_;
+            dumpVecBuffer(htmlArtical, htmlArticalBuffer);
+        // Return path to artical
+        return articalPath_;
     }
 
-    std::string ArticalHtmlDesigner::generatedefaultHtmlFile() const
+    void ArticalHtmlDesigner::dumpVecBuffer(std::ofstream& htmlArtical, std::vector<std::string> htmlArticalBuffer) const
+    {
+        for(std::string& lineBuff : htmlArticalBuffer)
+        {
+            htmlArtical << lineBuff;
+        }
+    }
+
+    std::string ArticalHtmlDesigner::generateDefaultHtmlFile()
     {
 
         // Open files to read and write.
@@ -137,25 +138,52 @@ namespace ArticalProcessing {
             throw std::ios_base::failure("Failed to open file for writing: ");
         }
 
-       // std::cout << htmlTemplateFile.rdbuf();
+       // create buffer to create the file
+        std::vector<std::string> htmlArticalBuffer;
 
-        // Read the template into a buffer and into a string.
-        std::stringstream buffer;
-        buffer <<  htmlTemplateFile.rdbuf();
-        std::string htmlTemplate = buffer.str();
+        // Read the template into a buffer.
+        std::stringstream HtmlTemplateBuffer;
+        HtmlTemplateBuffer <<  htmlTemplateFile.rdbuf();
 
-        // Fill in all the template.
-        htmlTemplate = replaceAll(htmlTemplate, "{{language}}", lng_.name());
-        htmlTemplate = replaceAll(htmlTemplate, "{{direction}}", dir_.name());
-        htmlTemplate = replaceAll(htmlTemplate, "{{title}}", artical_.getHeadline());
-        htmlTemplate = replaceAll(htmlTemplate, "{{publishTime}}", artical_.getPublishDate());
-        htmlTemplate = replaceAll(htmlTemplate, "{{author name}}", artical_.getAuthor());
-        htmlTemplate = replaceAll(htmlTemplate, "{{URLlink}}", artical_.getURLlink());
-        htmlTemplate = replaceAll(htmlTemplate, "{{articalText}}", artical_.getArticleText());
+        // Fill in the buffer with the template buffer for each line of template.
+        std::string line;
+        std::string llmRequests = createRequests();
+        int i = 0;
+        while (std::getline(HtmlTemplateBuffer, line))
+        {
+            i++;
+            if(addTemplate(line,"{{language}}", true,
+                lng_.name(), htmlArticalBuffer))
+            {
+                htmlArticalBuffer.pop_back();
+                addTemplate(line,"{{direction}}", true,
+                dir_.name(), htmlArticalBuffer);
+                continue;
+            }
 
-        // Copy the generated file into the html artical file.
-        htmlArtical << htmlTemplate;
 
+            if(addTemplate(line, "{{title}}",true,
+                artical_.getHeadline(), htmlArticalBuffer)) continue;
+
+            if(addTemplate(line, "{{publishTime}}",true,
+                artical_.getPublishDate(), htmlArticalBuffer)) continue;
+
+            if(addTemplate(line, "{{author name}}",true,
+                artical_.getAuthor(), htmlArticalBuffer)) continue;
+
+            if(addTemplate(line, "{{URLlink}}",true,
+                artical_.getURLlink(), htmlArticalBuffer)) continue;
+
+            if(addTemplate(line, "{{articalText}}",true,
+                artical_.getArticleText(), htmlArticalBuffer)) continue;
+
+            if(addTemplate(line, "{{LLM answers}}",LLMRequests_,
+                llmRequests, htmlArticalBuffer)) continue;
+
+            htmlArticalBuffer.push_back(line + "\n");
+        }
+
+        dumpVecBuffer(htmlArtical, htmlArticalBuffer);
         // Return path to artical.
         return  articalPath_;
     }
@@ -183,4 +211,35 @@ namespace ArticalProcessing {
         return augmentedString + ".html";
     }
 
-} // Artical
+    std::string ArticalHtmlDesigner::createRequests()
+    {
+        std::string fullRequest;
+        auto requests = artical_.getRequests();
+        for(const LLM::Request& request: requests)
+        {
+            fullRequest +=
+                            "<section class=\"ai-response\">\n"
+                            "  <h2>" + request.get_title() + "</h2>\n"
+                            "  <p>" + request.get_answer() + "</p>\n"
+                            "</section>\n";
+        }
+        return fullRequest;
+    }
+
+    bool ArticalHtmlDesigner::addTemplate(string& line, const char* templateStr, bool shouldAdd,
+        const string& TemplateReplacement, std::vector<std::string>& vecBuffer)
+    {
+        if(line.find(templateStr) != std::string::npos)
+        {
+            if(shouldAdd) Util::StringUtil::replaceAll(line, templateStr , TemplateReplacement);
+            else line = "";
+            vecBuffer.push_back(line + "\n") ;
+            return true;
+        }
+        return false;
+        
+    }
+
+
+} // ArticalProcessing
+

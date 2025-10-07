@@ -10,6 +10,7 @@
 
 #include "Artical.h"
 #include "../ArticleScraper/HtmlExtractor.h"
+#include "../Util/StringUtil.h"
 
 namespace ArticalProcessing {
     /**
@@ -60,6 +61,7 @@ namespace ArticalProcessing {
         void addArticalText();
         void addArticalURLlink();
         void addAuthor();
+        void addLLMRequests();
 
         /**
          *  This method lets the user control what path the html generated will have.
@@ -80,25 +82,30 @@ namespace ArticalProcessing {
          */
         explicit ArticalHtmlDesigner(Artical &artical);
 
+
+
         /**
          * This method creates a html file according to user prefrences.
          * @return The path to the html file created.
          */
-        [[nodiscard]] std::string generateHtmlFile() const;
+        [[nodiscard]] std::string generateHtmlFile() ;
+
+     
+        void dumpVecBuffer(std::ofstream& htmlArtical, std::vector<std::string> htmlArticalBuffer) const;
 
         /**
          * Create a default layout with will be all the fields desplayed on the page.
         * @return The path to the html file created..
          */
-        [[nodiscard]] std::string generatedefaultHtmlFile() const;
+        [[nodiscard]] std::string generateDefaultHtmlFile() ;
 
 private:
     Artical artical_;
-    std::string articalPath_;
+    std::string articalPath_;     //The path in Lucid directory to create the Html page.
     Dir dir_;
     Language lng_;
 
-    bool title_, publishTime_, publisherData_, articleText_, URLlink_,author_;
+    bool title_, publishTime_, publisherData_, articleText_, URLlink_,author_, LLMRequests_;
 
         /**
          *  Generates a generic and unique path according to the URL link provided by the artical object.
@@ -106,6 +113,12 @@ private:
          * @return A path that can be used by windows.
          */
         static std::string generatePath(const std::string& path);
+
+         [[nodiscard]] std::string createRequests() ;
+
+     static bool addTemplate(string& line, const char* templateStr, bool shouldAdd,
+      const string& TemplateReplacement, std::vector<std::string>& vecBuffer);
+
 };
 
 } // ArticalProcessing

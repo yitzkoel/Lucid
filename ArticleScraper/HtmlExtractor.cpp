@@ -5,6 +5,11 @@
 #include "HtmlExtractor.h"
 
 # define MAX_PATH_LENGTH 95
+
+
+
+
+
 /**
  *  This method replaces all problomatic chars in a URL path so it will be able to be used as a file path in windows.
  * @param path the URL.
@@ -165,19 +170,24 @@ namespace ArticalScraper {
 
         //Transparent User-Agent to aprove scrape
         curl_easy_setopt(curl, CURLOPT_USERAGENT,
-            "ArticleLooker (Educational Purpose; Contact: yitzkoel@gmail.com)");
+            "Article view (Educational Purpose student in huji: Contact: yitzkoel@gmail.com)");
 
         //Setting up the handle
         curl_easy_setopt(curl,CURLOPT_URL, path.c_str());
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, fwrite);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, file);
+
+        
+        curl_easy_setopt(curl, CURLOPT_SSL_OPTIONS, CURLSSLOPT_NATIVE_CA);
+        
         CURLcode result = curl_easy_perform(curl);
 
         if(result != CURLE_OK)
         {
             curl_easy_cleanup(curl);
             fclose(file);
-            throw std::runtime_error("CURL error: Failed to download from "+path);
+            std::string err = std::string("CURL error: ") + curl_easy_strerror(result);
+            throw std::runtime_error( err +" "+ path);
         }
 
         curl_easy_cleanup(curl);
@@ -252,18 +262,20 @@ namespace ArticalScraper {
 
         // Regex for main artical text blocks
         std::smatch m;
-        std::regex pattern(R"(((<p>|<p class="article_speakable">)(.*?)</p>)|(<span data-text="true">(.*?)</span>))");
-
+        std::regex pattern(R"(((<p>|<p\s).*?</p>)|(<span data-text="true">(.*?)</span>))");
 
         while (std::regex_search(html, m, pattern)) {
             std::string inner_text;
-            if (m[3].matched)        // <p> branch matched
-                inner_text = m[3].str();
-            else if (m[5].matched)   // <span> branch matched
-                inner_text = m[5].str();
+            if (m[1].matched)        // <p> branch matched
+                inner_text = m[1].str();
+            else if (m[4].matched)   // <span> branch matched
+                inner_text = m[4].str();
             artical->addTextToArtical("<p>" + inner_text + "</p>");
             html = m.suffix().str();
         }
+
+        // Remove all unwanted Tags look at h file to understand which tags were removed.
+        artical->set_article_text(std::regex_replace(artical->getArticleText(), tags, "")) ;
 
         //safe close and renaming of reformated artical
         html_page.close();

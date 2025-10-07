@@ -43,9 +43,37 @@ namespace ArticalScraper
          */
         static std::string htmlDataExtractorToFile(const std::string& path);
 
-        
+
         static std::unique_ptr<ArticalProcessing::Artical> htmlDataExtractorToArtical(const std::string& path);
 
+    private:
+        //inline static const std::string pictureTag = "<picture\\s.*?</picture>";
+        //inline static const std::string styleTag2 = "<style\\s.*?</style>";
+        //inline static const std::string figcaptionTag = "<figcaption\\s.*?</figcaption>";
+        inline static const std::string termsAndConditions = "<p class=\"terms-and-conditions-p\".*?</p>";
+        inline static const std::string comentNotesTag = "<p class=\"comment-.*?\">.*?</p>";
+        inline static const std::string styleTag1 = "<p style=\"display:.*?</p>";
+        inline static const std::string acwp_title = "<p class=\"acwp-title\">.*?</p>";
+        static const int NUM_OF_TAGS_TO_REMOVE = 4;
+
+        inline static const std::array<std::string, NUM_OF_TAGS_TO_REMOVE> removeTagsArray =
+        {
+            styleTag1, acwp_title,
+            termsAndConditions, comentNotesTag
+        };
+
+        inline static const std::string combinedRemoveTags = []
+        {
+            std::string temp;
+            for (const std::string& tag : removeTagsArray)
+            {
+                temp += tag + "|";
+            }
+            temp.pop_back();
+            return temp;
+        }();
+
+        inline static const std::regex tags{combinedRemoveTags};
     };
 } // ArticalScraper
 

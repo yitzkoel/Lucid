@@ -9,11 +9,16 @@
 #include "ArticalProcessing/ArticalHtmlDesigner.h"
 #include "ArticleScraper/HtmlExtractor.h"
 #include "LLM/client.h"
+#include "UserInterface/Shell.h"
 
-#define REQUEST1 "The following article is in hebrew. Critically analyze this article for logical errors, biases, and validity"\
-"of arguments, in neutral, unbiased language. Organize for readability. Respond in the same language as the article.";
+const std::string REQUEST1 =
+    "The following article is in hebrew. Critically analyze this article for logical errors, biases, and validity"\
+    "of arguments, in neutral, unbiased language. Organize for readability. Respond in the same language as the article."\
+    "Organize for readability and RETURN THE OUTPUT AS PURE HTML ONLY (no markdown)"\
+    "No need to add a title just add the critical analysis.";
 
-std::string activate_artical_downlaoder(int argc, char* argv[]){
+std::string activate_artical_downlaoder(int argc, char* argv[])
+{
     std::string path1;
     try
     {
@@ -47,7 +52,7 @@ std::string activate_artical_downlaoder(int argc, char* argv[]){
     return path1;
 }
 
-int activate_artical_extractor_to_file(const std::string &path)
+int activate_artical_extractor_to_file(const std::string& path)
 {
     try
     {
@@ -79,16 +84,15 @@ int activate_artical_extractor_to_file(const std::string &path)
         std::cerr << "Download failed!" << std::endl;
         return EXIT_FAILURE;
     }
-
 }
 
-std::unique_ptr<ArticalProcessing::Artical> activate_artical_extractor_to_Artical(const std::string &path)
+std::unique_ptr<ArticalProcessing::Artical> activate_artical_extractor_to_Artical(const std::string& path)
 {
     std::unique_ptr<ArticalProcessing::Artical> artical = nullptr;
     try
     {
-         artical = ArticalScraper::HtmlExtractor::htmlDataExtractorToArtical(path);
-         std::cout << "successfully extracted" + path + " to Artical Object\n";
+        artical = ArticalScraper::HtmlExtractor::htmlDataExtractorToArtical(path);
+        std::cout << "successfully extracted " + path + " to Artical Object\n";
     }
     catch (const std::ios_base::failure& e)
     {
@@ -109,11 +113,10 @@ int test_HtmlExtractor_class(int argc, char* argv[])
     path1 = activate_artical_downlaoder(argc, argv);
 
     return activate_artical_extractor_to_file(path1);
-
 }
 
 
-int test_HtmlExtracor_and_designer(int argc, char* argv[])
+int test_HtmlExtracor_and_designer_without_LLM(int argc, char* argv[])
 {
     if (argc != 2)
     {
@@ -125,7 +128,7 @@ int test_HtmlExtracor_and_designer(int argc, char* argv[])
     path1 = activate_artical_downlaoder(argc, argv);
 
     std::unique_ptr<ArticalProcessing::Artical> artical = activate_artical_extractor_to_Artical(path1);
-    if(!artical)
+    if (!artical)
     {
         return EXIT_FAILURE;
     }
@@ -134,13 +137,13 @@ int test_HtmlExtracor_and_designer(int argc, char* argv[])
 
     try
     {
-        std::string htmlPath = designer.generatedefaultHtmlFile();
+        std::string htmlPath = designer.generateDefaultHtmlFile();
         return EXIT_SUCCESS;
     }
     catch (const std::ios_base::failure& e)
     {
         std::cerr << e.what() << "\n";
-        return  EXIT_FAILURE;
+        return EXIT_FAILURE;
     }
 }
 
@@ -152,19 +155,20 @@ int test_Basic_LLM_client(int argc, char* argv[])
         return EXIT_FAILURE;
     }
     const char* key_cstr = std::getenv("OPENAI_API_KEY");
-    if (key_cstr == nullptr) {
+    if (key_cstr == nullptr)
+    {
         std::cerr << "API key not found in environment variables." << std::endl;
         return EXIT_FAILURE;
     }
-    std::string key(key_cstr);;
+    std::string key(key_cstr);
     LLM::client clnt(key);
 
     try
     {
         std::string request;
-        for(int i = 1; i < argc; i++)
+        for (int i = 1; i < argc; i++)
         {
-          request.append(argv[i]);
+            request.append(argv[i]);
             request.append(" ");
         }
         std::cout << clnt.getResponse(request);
@@ -175,10 +179,7 @@ int test_Basic_LLM_client(int argc, char* argv[])
         std::cout << "failed to generate LLM response" << e.what() << std::endl;
         return EXIT_FAILURE;
     }
-
 }
-
-
 
 int test_LLM_response_To_Article(int argc, char* argv[])
 {
@@ -192,20 +193,26 @@ int test_LLM_response_To_Article(int argc, char* argv[])
     path1 = activate_artical_downlaoder(argc, argv);
 
     std::unique_ptr<ArticalProcessing::Artical> artical = activate_artical_extractor_to_Artical(path1);
-    if(!artical)
+    if (!artical)
     {
         return EXIT_FAILURE;
     }
 
     std::string articalTxt = artical->getArticleText();
 
-    std::string key(LLM_KEY);
+    const char* key_cstr = std::getenv("OPENAI_API_KEY");
+    if (key_cstr == nullptr)
+    {
+        std::cerr << "API key not found in environment variables." << std::endl;
+        return EXIT_FAILURE;
+    }
+    std::string key(key_cstr);
     LLM::client clnt(key);
 
     try
     {
         std::string request;
-        for(int i = 2; i < argc; i++)
+        for (int i = 2; i < argc; i++)
         {
             request.append(argv[i]);
             request.append(" ");
@@ -226,16 +233,78 @@ int test_LLM_response_To_Article(int argc, char* argv[])
     }
 }
 
+int test_Html_designer_with_LLM(int argc, char* argv[])
+{
+    if (argc != 2)
+    {
+        std::cerr << "Wrong number of arguments, can accept 2 only.";
+        return EXIT_FAILURE;
+    }
+
+    std::string path1;
+    path1 = activate_artical_downlaoder(argc, argv);
+
+    std::unique_ptr<ArticalProcessing::Artical> artical = activate_artical_extractor_to_Artical(path1);
+    if (!artical)
+    {
+        return EXIT_FAILURE;
+    }
+
+    const char* key_cstr = std::getenv("OPENAI_API_KEY");
+    if (key_cstr == nullptr)
+    {
+        std::cerr << "API key not found in environment variables." << std::endl;
+        return EXIT_FAILURE;
+    }
+    std::string key(key_cstr);
+    LLM::client clnt(key);
+
+
+    //add requests to artical
+    LLM::Request request;
+    try
+    {
+        request = LLM::Request(REQUEST1,
+                             artical->getArticleText(),
+                             "Critical Analysis", clnt);
+        artical->addRequest(request);
+    }
+    catch (const std::runtime_error& e)
+    {
+        std::cerr << "failed to run test of html desighn with LLM request added.\n" << e.what() << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    
+    ArticalProcessing::ArticalHtmlDesigner designer(*artical);
+
+    try
+    {
+        std::string htmlPath = designer.generateDefaultHtmlFile();
+        std::cout << "Succecful Html with LLM created!!!" << std::endl;
+        return EXIT_SUCCESS;
+    }
+    catch (const std::ios_base::failure& e)
+    {
+        std::cerr << e.what() << "\n";
+        return EXIT_FAILURE;
+    }
+}
+
 int main(int argc, char* argv[])
 {
     //return test_HtmlExtractor_class(argc, argv);
     //return test_HtmlExtracor_and_designer(argc,argv);
 
-    return test_Basic_LLM_client(argc, argv);
+    //return test_Basic_LLM_client(argc, argv);
+
+    //return test_Html_designer_with_LLM(argc, argv);
+
 
     // // Set console to UTF-8 output
     // _setmode(_fileno(stdout), _O_U8TEXT);
     //
     // return test_LLM_response_To_Article(argc, argv);
+    auto shell = UserInterface::Shell::create();
+    return shell->run();
 }
-

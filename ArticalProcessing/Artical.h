@@ -5,6 +5,9 @@
 #ifndef ARTICAL_H
 #define ARTICAL_H
 #include <string>
+#include <vector>
+
+#include "../LLM/Request.h"
 
 namespace ArticalProcessing {
     /**
@@ -40,6 +43,7 @@ namespace ArticalProcessing {
 
         // default constructor
         Artical() = default;
+        
 
         //setters
         void set_URLlink(const std::string& URL_link) {URLlink = URL_link;}
@@ -48,6 +52,7 @@ namespace ArticalProcessing {
         void set_publish_date(const std::string& publish_date) {publishDate = publish_date;}
         void set_publisher_data(const std::string& publisher_data) {publisherData = publisher_data;}
         void set_article_text(const std::string& article_text) {articleText = article_text;}
+        void addRequest(LLM::Request& request){LLMRequests.push_back(std::move(request));}
 
         // getters
         [[nodiscard]] const std::string& getURLlink() const { return URLlink; }
@@ -56,6 +61,7 @@ namespace ArticalProcessing {
         [[nodiscard]] const std::string& getPublishDate() const { return publishDate; }
         [[nodiscard]] const std::string& getPublisherData() const { return publisherData; }
         [[nodiscard]] const std::string& getArticleText() const { return articleText; }
+        [[nodiscard]] std::vector<LLM::Request>& getRequests()  {return LLMRequests;}
 
         /**
          * This method lets you add more text to the artical dynamicly.
@@ -70,6 +76,7 @@ namespace ArticalProcessing {
         std::string publishDate;
         std::string publisherData;
         std::string articleText;
+        std::vector<LLM::Request> LLMRequests;
     };
 
 } // ArticalProccessing
