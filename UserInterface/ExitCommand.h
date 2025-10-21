@@ -7,8 +7,10 @@
 #include "Command.h"
 
 namespace UserInterface {
-
-class ExitCommand : public Command{
+    /**
+     * This command is responsible to terminate the shell run.
+     */
+    class ExitCommand : public Command{
 public:
     explicit ExitCommand(std::shared_ptr<Shell>& shell)
         : Command(shell)

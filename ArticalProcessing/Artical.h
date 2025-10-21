@@ -6,9 +6,16 @@
 #define ARTICAL_H
 #include <string>
 #include <vector>
-
 #include "../LLM/Request.h"
 
+/**
+ * This namespace has the classes responsible to create objects that
+ * hold articles and all important data on those article that provide user friendly API.
+ *
+ * And A class ArticleHtmlDesighner that gets a article object and is able to create a html file to represent that article.
+ *
+ * @note  **IMPORTANT ASSUMPTIONS** The articl desighner assumes that
+ */
 namespace ArticalProcessing {
     /**
      * This class represents a Article.
@@ -20,6 +27,7 @@ namespace ArticalProcessing {
         //
         /**
          * Parameterized constructor
+         *
          * @param URLlink The link to the artical website source.
          * @param nameOfAuther The name of the artical's author.
          * @param headline The name of the artical's headline.

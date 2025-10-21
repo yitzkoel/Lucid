@@ -7,8 +7,10 @@
 #include "Command.h"
 
 namespace UserInterface {
-
-class ExportCommand : public Command{
+    /**
+     * This class genrates a html file of the cur article and saves is at the givin directory.
+     */
+    class ExportCommand : public Command{
 public:
     explicit ExportCommand(std::shared_ptr<Shell>& shell)
         : Command(shell)

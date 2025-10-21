@@ -5,7 +5,7 @@
 #include "FileUtil.h"
 #include <iostream>
 
-namespace Util {
+namespace Util::FileUtil {
     namespace fs = std::filesystem;
     
     void copyFile(const std::string& srcPath, const std::string& destPath)

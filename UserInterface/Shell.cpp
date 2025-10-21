@@ -24,8 +24,8 @@ namespace UserInterface {
     {
         artical_ = std::move(artical);
         hasArticalLoaded_ = true;
-        analysisEnabled_ = false;
-        analysisGenerated_ = false;
+        analysisEnabled_ = false;    // No cretaed analysis yet
+        analysisGenerated_ = false;  // No cretaed analysis yet
     }
 
     bool Shell::executeCommand(std::string& commandStr, std::string& arg)

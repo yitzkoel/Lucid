@@ -148,10 +148,8 @@ namespace ArticalProcessing {
         // Fill in the buffer with the template buffer for each line of template.
         std::string line;
         std::string llmRequests = createRequests();
-        int i = 0;
         while (std::getline(HtmlTemplateBuffer, line))
         {
-            i++;
             if(addTemplate(line,"{{language}}", true,
                 lng_.name(), htmlArticalBuffer))
             {

@@ -21,7 +21,7 @@ namespace UserInterface {
         ArticalProcessing::ArticalHtmlDesigner designer(shell_->getArtical());
         if(shell_->hasAnalysisEnabled()) designer.addLLMRequests();
         std::string htmlPath = designer.generateDefaultHtmlFile();
-        Util::copyFile(htmlPath, arg);
-        Util::deleteFile(htmlPath);
+        Util::FileUtil::copyFile(htmlPath, arg);
+        Util::FileUtil::deleteFile(htmlPath);
     }
 } // UserInterface

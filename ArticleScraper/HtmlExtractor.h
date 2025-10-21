@@ -13,55 +13,112 @@
 
 #include "../ArticalProcessing/Artical.h"
 
+/**
+ * This namespase allows to scrape URL's of articles.
+ *
+ * @note  **IMPORTANT ASSUMPTION** This assumes that the input URL is an actual article.
+ * @note  **IMPORTANT ASSUMPTION** This library can handle only article that the article text is in the html page.
+ *                                 It can't handel article pages that the html contain a js script that genrate
+ *                                 the article text.
+ * @note **IMPORTANT ASSUMPTION** this library was tested only on the current(2025) israely news sites.
+ *
+ */
 namespace ArticalScraper
 {
+    /**
+     * This class extracts the html page from teh web and can extract the required data from it.
+     * That is:
+     *       1.article text.
+     *       2.Name of author.
+     *       3.Headline.
+     *       4.Publish date.
+     *       5.Publisher information.
+     *       6.Link to page.
+     *
+     */
     class HtmlExtractor
     {
     public:
         /**
          * This methed sends a request from a website to the html and saves it to a local file.
          * This scaper handels only http and https requests and will return failure otherwise.
+         *
          * @param path A path to the website that holds the artical.
          * @return A path to a local directory that holds the articals html, returns empty string if fail.
          */
         static std::string websiteDownloader(const std::string& path);
 
         /**
-         * This methods recieves a raw html in a txt file of a artical and removes all unessecery text.
+         * This methods recieves a raw html in a txt file of a artical and removes all unessecery text
+         * And saves it in the given path.
+         *
          * It keeps the fallowing data (in this order):
          *
-         * In JSON  <script type=\"application/ld+json\"> ... <\script> form:
+         * We save in the file the metaData on the article In JSON format.
+         * it will be saved inside the fallowing header:
+         *                              <script type=\"application/ld+json\"> THE META DATA <\script>
+         * The META DATA will include the falowing in this order:
          * 1.Link to page.
          * 2.Name of author.
          * 3.Headline.
          * 4.Publish date.
          * 5.Publisher information.
          *
-         * In paragraph form the artical text <p>....<\p>
+         *  After MetaData we will add the actual article text in the the header <p>ARTICLE TEXT<\p>
+         *
          * @param path  the path to the downlaoded html file.
-         * @return A path to the reformated file please note that it is the same path as the input path.
+         * @return A path to the reformated file.
+         *         please note that it is the same path as the input path.
          */
         static std::string htmlDataExtractorToFile(const std::string& path);
 
-
+        /**
+         * This methods recieves a raw html in a txt file of a article and creates a article obj that holds all
+         * important information on the article.
+         * It keeps the fallowing data :
+         *
+         *  URLlink
+         *  nameOfAuther
+         *  headline
+         *  publishDate
+         *  publisherData
+         *  articleText
+         *
+         * @param path  the path to the downlaoded html file.
+         * @return A path to the reformated file please note that it is the same path as the input path.
+         */
         static std::unique_ptr<ArticalProcessing::Artical> htmlDataExtractorToArtical(const std::string& path);
 
     private:
-        //inline static const std::string pictureTag = "<picture\\s.*?</picture>";
-        //inline static const std::string styleTag2 = "<style\\s.*?</style>";
-        //inline static const std::string figcaptionTag = "<figcaption\\s.*?</figcaption>";
+        /**
+         * all of the code bellow is to create one static regex
+         * that will be created once in the program's static initialization phase,
+         * and will be saved during the running of any program that will include this class.
+         *
+         * The regex that will be used later to remove all these bellow tags
+         * from the text extracted from the html downloaded.
+         *
+         * all the tags bellow are regex patterns.
+         * They are ment to catch patterns that need to be removed from the article html text.
+         */
         inline static const std::string termsAndConditions = "<p class=\"terms-and-conditions-p\".*?</p>";
         inline static const std::string comentNotesTag = "<p class=\"comment-.*?\">.*?</p>";
-        inline static const std::string styleTag1 = "<p style=\"display:.*?</p>";
+        inline static const std::string styleTag = "<p style=\"display:.*?</p>";
         inline static const std::string acwp_title = "<p class=\"acwp-title\">.*?</p>";
         static const int NUM_OF_TAGS_TO_REMOVE = 4;
 
+        /**
+         * create a array of all tags to remove.
+         */
         inline static const std::array<std::string, NUM_OF_TAGS_TO_REMOVE> removeTagsArray =
         {
-            styleTag1, acwp_title,
+            styleTag, acwp_title,
             termsAndConditions, comentNotesTag
         };
 
+        /**
+         * lambda To create the combined regex of all tags that need to be remved.
+         */
         inline static const std::string combinedRemoveTags = []
         {
             std::string temp;
@@ -73,6 +130,7 @@ namespace ArticalScraper
             return temp;
         }();
 
+        // the final regex.
         inline static const std::regex tags{combinedRemoveTags};
     };
 } // ArticalScraper

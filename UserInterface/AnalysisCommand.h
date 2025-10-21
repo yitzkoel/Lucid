@@ -9,6 +9,9 @@
 
 namespace UserInterface
 {
+    /**
+     * This class is the command that generates and adds the analysis to the cur artical loaded in the shell.
+     */
     class AddAnalysisCommand : public Command
     {
     public:
@@ -19,6 +22,9 @@ namespace UserInterface
         void execute(std::string arg) override;
     };
 
+    /**
+     * This class is the command that generates and adds the analysis to the cur artical loaded in the shell.
+     */
     class RemoveAnalysisCommand : public Command
     {
     public:

@@ -10,19 +10,33 @@
 #include "Shell.h"
 #include <memory>
 
-namespace UserInterface {
+namespace UserInterface
+{
     class Shell;
 
-class Command {
-public:
-    explicit Command(std::shared_ptr<Shell>& shell):shell_(shell){}
-    virtual void execute(std::string arg) = 0;
-    std::shared_ptr<Shell> getShell() {return  shell_;}
-    virtual  ~Command() = default;
-protected:
-    std::shared_ptr<Shell> shell_;
-};
+    /**
+     * This class is abstract.
+     * The subclasses of this class will be responsible for running the logic of user commands.
+     * It holds one public method, 'execute'.
+     */
+    class Command
+    {
+    public:
+        explicit Command(std::shared_ptr<Shell>& shell): shell_(shell)
+        {
+        }
 
+        /**
+         * This method runs the logic of the given command type.
+         * @param arg the arg input to run the command.
+         */
+        virtual void execute(std::string arg) = 0;
+        std::shared_ptr<Shell> getShell() { return shell_; }
+        virtual ~Command() = default;
+
+    protected:
+        std::shared_ptr<Shell> shell_;
+    };
 } // UserInterface
 
 #endif //COMMAND_H

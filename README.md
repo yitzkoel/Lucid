@@ -3,7 +3,7 @@ Project goals:
 1. create noise free article layout (nothing but the article and assistive data).
 2. add LLM to webpage with quires (maby summery maby critic);
 3. give articles layout based on different political bias(not sure how to implement maby an opposing suggested view
-at the end of the article with a link )
+at the end of the article with a link)
 4. Optional: adding features to 2: having at he same page apposing views with LLM generated analysis. 
 5. Very far ambition : a truth Monitor, a easily accessed database that hold the records of officials and media people
 opions and recorded dishonesty, (can have video, audio, court records, police record and every data publicly available
@@ -13,14 +13,20 @@ The goals are listed in order of importance and progression.
 
 
 must do improvments (performance)
-1. change htmlExtractor to a obj that holds a curl and save it in  LoadCammand and call it saves
-generating a new curl to each call command.
-2. do 1 LLM::client in AnalysisCommand.
-3. add a DNS cache so websites lookup will be quecker (use local windows or whatever is simplest)
-4. add timing breakdown to locate where is the time goint when loading a html.
-5. enable HTTP/2(chat gpt offered need to understand)
-6. Enable commpretion(chat offered I dont understand the consequenses)
-goal: call to feel instantanios (under 100 ms please see if there a tool that can mesure).
+1. In HTMLExtractor and Article have methods convet_URL_to_valid_path and generatePath.
+They can be in StringUtil and the regex in them made into static as in htmlDesighner.
+1. add to htmlDesihgner the regex for parsing the article text and name of auther and so on
+in the Extractor, addMetaData, convet_URL_to_valid_path, isValidURL_Regex methods to be static 
+1. have htmlDesighner hold curl as field and call it in websitedownloader.
+2. have analysis command hold a LLM obj as field 
+3. have open command hold htmlextractor as field
+4. add a DNS cache so websites lookup will be quecker (use local windows or whatever is simplest)
+to LLM curl obj and htmlExtractor curl obj.
+5. add timing breakdown to locate where is the time goint when loading a html to locate biggest bottle neck
+and see if you can improve it.
+6. enable HTTP/2(chat gpt offered need to understand)  somthing in curl need to check.
+7. Enable commpretion(chat offered I dont understand the consequenses)  somthing in curl need to check.
+goal: load command should feel instantanios (under 100 ms please see if there a tool that can mesure).
 
 must do to extend:
 Currently I can only handle sites that hve thier artical in the explicit html page, but some sites have thier artical
