@@ -32,7 +32,7 @@ namespace ArticalProcessing {
     lng_(Language::HEB)
 
         {
-            articalPath_ = generatePath(this->artical_.getURLlink());
+            articalPath_ = Util::StringUtil::convet_URL_to_valid_path(this->artical_.getURLlink());
         }
 
 
@@ -85,31 +85,31 @@ namespace ArticalProcessing {
         std::string llmRequests = createRequests();
         while (std::getline(buffer, line))
         {
-            if(addTemplate(line,"{{language}}", true,
+            if(addTemplate(line,LANGUAGE_TEMPLATE, true,
                 lng_.name(), htmlArticalBuffer))
             {
                 htmlArticalBuffer.pop_back();
-                addTemplate(line,"{{direction}}", true,
+                addTemplate(line,DIRECTION_TEMPLATE, true,
                 dir_.name(), htmlArticalBuffer);
                 continue;
             }
 
-            if(addTemplate(line, "{{title}}",title_,
+            if(addTemplate(line, TITLE_TEMPLATE,title_,
                 artical_.getHeadline(), htmlArticalBuffer)) continue;
 
-            if(addTemplate(line, "{{publishTime}}",publishTime_,
+            if(addTemplate(line, PUBLISH_TIME_TEMPLATE,publishTime_,
                 artical_.getPublishDate(), htmlArticalBuffer)) continue;
 
-            if(addTemplate(line, "{{author}}",author_,
+            if(addTemplate(line, AUTHOR_TEMPLATE,author_,
                 artical_.getAuthor(), htmlArticalBuffer)) continue;
 
-            if(addTemplate(line, "{{URLlink}}",URLlink_,
+            if(addTemplate(line, URL_LINK_TEMPLATE,URLlink_,
                 artical_.getURLlink(), htmlArticalBuffer)) continue;
 
-            if(addTemplate(line, "{{articalText}}",articleText_,
+            if(addTemplate(line, ARTICLE_TEXT_TEMPLATE,articleText_,
                 artical_.getArticleText(), htmlArticalBuffer)) continue;
 
-            if(addTemplate(line, "{{LLM answers}}",LLMRequests_,
+            if(addTemplate(line, LLM_ANSWER_TEMPLATE,LLMRequests_,
                 llmRequests, htmlArticalBuffer)) continue;
 
             htmlArticalBuffer.push_back(line + "\n");
@@ -119,20 +119,12 @@ namespace ArticalProcessing {
         return articalPath_;
     }
 
-    void ArticalHtmlDesigner::dumpVecBuffer(std::ofstream& htmlArtical, std::vector<std::string> htmlArticalBuffer) const
-    {
-        for(std::string& lineBuff : htmlArticalBuffer)
-        {
-            htmlArtical << lineBuff;
-        }
-    }
-
     std::string ArticalHtmlDesigner::generateDefaultHtmlFile()
     {
 
         // Open files to read and write.
         std::ofstream htmlArtical(articalPath_);
-        std::ifstream htmlTemplateFile("C:/Users/yitzk/Desktop/c programs/Lucid/articalTemplateHtml");
+        std::ifstream htmlTemplateFile(HTML_TEMPLATE_PATH);
         if(!htmlArtical || !htmlTemplateFile)
         {
             throw std::ios_base::failure("Failed to open file for writing: ");
@@ -150,32 +142,32 @@ namespace ArticalProcessing {
         std::string llmRequests = createRequests();
         while (std::getline(HtmlTemplateBuffer, line))
         {
-            if(addTemplate(line,"{{language}}", true,
+            if(addTemplate(line,LANGUAGE_TEMPLATE, true,
                 lng_.name(), htmlArticalBuffer))
             {
                 htmlArticalBuffer.pop_back();
-                addTemplate(line,"{{direction}}", true,
+                addTemplate(line,DIRECTION_TEMPLATE, true,
                 dir_.name(), htmlArticalBuffer);
                 continue;
             }
 
 
-            if(addTemplate(line, "{{title}}",true,
+            if(addTemplate(line, TITLE_TEMPLATE,true,
                 artical_.getHeadline(), htmlArticalBuffer)) continue;
 
-            if(addTemplate(line, "{{publishTime}}",true,
+            if(addTemplate(line, PUBLISH_TIME_TEMPLATE,true,
                 artical_.getPublishDate(), htmlArticalBuffer)) continue;
 
-            if(addTemplate(line, "{{author name}}",true,
+            if(addTemplate(line, AUTHOR_TEMPLATE,true,
                 artical_.getAuthor(), htmlArticalBuffer)) continue;
 
-            if(addTemplate(line, "{{URLlink}}",true,
+            if(addTemplate(line, URL_LINK_TEMPLATE,true,
                 artical_.getURLlink(), htmlArticalBuffer)) continue;
 
-            if(addTemplate(line, "{{articalText}}",true,
+            if(addTemplate(line, ARTICLE_TEXT_TEMPLATE,true,
                 artical_.getArticleText(), htmlArticalBuffer)) continue;
 
-            if(addTemplate(line, "{{LLM answers}}",LLMRequests_,
+            if(addTemplate(line, LLM_ANSWER_TEMPLATE,LLMRequests_,
                 llmRequests, htmlArticalBuffer)) continue;
 
             htmlArticalBuffer.push_back(line + "\n");
@@ -186,27 +178,12 @@ namespace ArticalProcessing {
         return  articalPath_;
     }
 
-
-
-
-    std::string ArticalHtmlDesigner::generatePath(const std::string& path)
+    void ArticalHtmlDesigner::dumpVecBuffer(std::ofstream& htmlArtical, const std::vector<std::string>& htmlArticalBuffer)
     {
-        std::regex protocol("^https?://");
-        std::regex invalid_chars(R"([%/:*?"<>|\\])");  // All problematic characters
-
-        std::string augmentedString = std::regex_replace(path, protocol,"");
-        augmentedString = std::regex_replace(augmentedString, invalid_chars, "_");
-
-        // Clean up multiple underscores
-        std::regex multiple_underscores("_+");
-        augmentedString = std::regex_replace(augmentedString, multiple_underscores, "_");
-
-        if(augmentedString.length() > MAX_PATH_LENGTH)
+        for(const std::string& lineBuff : htmlArticalBuffer)
         {
-            augmentedString = augmentedString.substr(0,MAX_PATH_LENGTH);
+            htmlArtical << lineBuff;
         }
-
-        return augmentedString + ".html";
     }
 
     std::string ArticalHtmlDesigner::createRequests()
@@ -224,7 +201,7 @@ namespace ArticalProcessing {
         return fullRequest;
     }
 
-    bool ArticalHtmlDesigner::addTemplate(string& line, const char* templateStr, bool shouldAdd,
+    bool ArticalHtmlDesigner::addTemplate(string& line, string& templateStr, bool shouldAdd,
         const string& TemplateReplacement, std::vector<std::string>& vecBuffer)
     {
         if(line.find(templateStr) != std::string::npos)

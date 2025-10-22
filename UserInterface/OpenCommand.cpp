@@ -23,8 +23,8 @@ namespace UserInterface {
         std::string htmlPath = designer.generateDefaultHtmlFile();
         std::string cmd = "start \"\" \"" + htmlPath + "\"";
         std::system(cmd.c_str());
-        // wait a bit before deleting
+        // wait a bit before deleting to make sure it opens correctly
         std::this_thread::sleep_for(std::chrono::seconds(2));
-        Util::deleteFile(htmlPath);
+        Util::FileUtil::deleteFile(htmlPath);
     }
 } // UserInterface

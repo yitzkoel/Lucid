@@ -17,9 +17,14 @@ namespace UserInterface
     public:
         explicit AddAnalysisCommand(std::shared_ptr<Shell>& shell) : Command(shell)
         {
+            setClient();
         }
 
         void execute(std::string arg) override;
+
+    private:
+        void setClient();
+        std::unique_ptr<LLM::client> client_ ;//The LLM model interface
     };
 
     /**

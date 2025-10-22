@@ -33,8 +33,18 @@ namespace UserInterface
         }
 
         ArticalProcessing::Artical& artical = shell_->getArtical();
-        std::string articalTxt = artical.getArticleText();
 
+        LLM::Request request = LLM::Request(REQUEST,
+                            artical.getArticleText(),
+                            REQUEST_TITLE, *client_);
+
+        artical.addRequest(request);
+        shell_->setAnalysis(true);
+        shell_->setGeneratedAnalysis(true);
+    }
+
+    void AddAnalysisCommand::setClient()
+    {
         const char* key_cstr = std::getenv("OPENAI_API_KEY");
         if (key_cstr == nullptr)
         {
@@ -51,14 +61,7 @@ namespace UserInterface
             );
         }
         std::string key(key_cstr);
-        LLM::client clnt(key);
-
-        LLM::Request request = LLM::Request(REQUEST,
-                            artical.getArticleText(),
-                            REQUEST_TITLE, clnt);
-        artical.addRequest(request);
-        shell_->setAnalysis(true);
-        shell_->setGeneratedAnalysis(true);
+        client_ = std::make_unique<LLM::client>(key);
     }
 
     void RemoveAnalysisCommand::execute(std::string arg)

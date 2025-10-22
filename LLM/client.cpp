@@ -94,13 +94,41 @@ namespace LLM {
         // Set curl.
         curl_easy_setopt(curl_, CURLOPT_HTTPHEADER, headers_);
         curl_easy_setopt(curl_,CURLOPT_URL,"https://api.openai.com/v1/chat/completions");
-        curl_easy_setopt(curl_, CURLOPT_TIMEOUT, 100L);  // 30 seconds
 
         // Set callback response
         curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, write_callback);
         curl_easy_setopt(curl_, CURLOPT_WRITEDATA, &bufferResponse_);
 
+        // Set a 10-second timeout for the connection phase
+        curl_easy_setopt(curl_, CURLOPT_CONNECTTIMEOUT, 10L);
+
+        // Set a 30-second total timeout for the entire request
+        curl_easy_setopt(curl_, CURLOPT_TIMEOUT, 30L);
+
+        /**
+         * PERFORMANCE OPTIONS OPTIMIZATION
+        */
+
+        // Enable TCP Keepalive
+        curl_easy_setopt(curl_, CURLOPT_TCP_KEEPALIVE, 1L);
+
+        // Disable Nagle's algorithm for lower latency
+        curl_easy_setopt(curl_, CURLOPT_TCP_NODELAY, 1L);
+
+        // Try to use HTTP/2
+        curl_easy_setopt(curl_, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
+
+        // Disable the progress meter, as it's not needed for API calls
+        curl_easy_setopt(curl_, CURLOPT_NOPROGRESS, 1L);
+
+        // Use the default CA bundle
         curl_easy_setopt(curl_, CURLOPT_SSL_OPTIONS, CURLSSLOPT_NATIVE_CA);
+
+        // Allow libcurl to reuse connections
+        curl_easy_setopt(curl_, CURLOPT_FORBID_REUSE, 0L);
+
+        // Allow compression requests
+        curl_easy_setopt(curl_, CURLOPT_ACCEPT_ENCODING, "");
     }
 
 } // LLM

@@ -13,20 +13,11 @@ The goals are listed in order of importance and progression.
 
 
 must do improvments (performance)
-1. In HTMLExtractor and Article have methods convet_URL_to_valid_path and generatePath.
-They can be in StringUtil and the regex in them made into static as in htmlDesighner.
-1. add to htmlDesihgner the regex for parsing the article text and name of auther and so on
-in the Extractor, addMetaData, convet_URL_to_valid_path, isValidURL_Regex methods to be static 
-1. have htmlDesighner hold curl as field and call it in websitedownloader.
-2. have analysis command hold a LLM obj as field 
-3. have open command hold htmlextractor as field
-4. add a DNS cache so websites lookup will be quecker (use local windows or whatever is simplest)
-to LLM curl obj and htmlExtractor curl obj.
 5. add timing breakdown to locate where is the time goint when loading a html to locate biggest bottle neck
 and see if you can improve it.
-6. enable HTTP/2(chat gpt offered need to understand)  somthing in curl need to check.
-7. Enable commpretion(chat offered I dont understand the consequenses)  somthing in curl need to check.
 goal: load command should feel instantanios (under 100 ms please see if there a tool that can mesure).
+8. maby make article desighner get article and is able to reset if loaded a new article saves space and better desighn.
+9. maby make htmlExtractor extract to a local string nd pass it on to increase speed.
 
 must do to extend:
 Currently I can only handle sites that hve thier artical in the explicit html page, but some sites have thier artical
@@ -39,3 +30,11 @@ And then call a external js interperter with that js that was writen to generate
 4. do 2 but with a browser(not a js interperter)
 the reason for 3 or 4 is somthing called DOM that i didnt understand what it really is but basicly a js interperter will
 not be able to run it and that requires a browser.
+                                                   
+
+
+Need to add all Asumption from code for example
+template file
+windows
+API key on system 
+maby more need to search: **IMPORTANT ASSUMPTION** in code to find all.

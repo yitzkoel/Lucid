@@ -40,13 +40,23 @@ namespace ArticalScraper
     {
     public:
         /**
+         * Constructor
+         */
+        HtmlExtractor();
+        /**
+         * Destructor;
+         */
+        ~HtmlExtractor();
+
+
+        /**
          * This methed sends a request from a website to the html and saves it to a local file.
          * This scaper handels only http and https requests and will return failure otherwise.
          *
          * @param path A path to the website that holds the artical.
          * @return A path to a local directory that holds the articals html, returns empty string if fail.
          */
-        static std::string websiteDownloader(const std::string& path);
+        [[nodiscard]] std::string websiteDownloader(const std::string& path) const;
 
         /**
          * This methods recieves a raw html in a txt file of a artical and removes all unessecery text
@@ -90,11 +100,69 @@ namespace ArticalScraper
         static std::unique_ptr<ArticalProcessing::Artical> htmlDataExtractorToArtical(const std::string& path);
 
     private:
+        CURL* curl_ = nullptr;
+        void setCurl();
+
+
         /**
-         * all of the code bellow is to create one static regex
+         *
+         * @param path The URL path to be downloaded artical from.
+         * This method checks that the path prefix is valid for the curl setting.
+         * @return bool of result.
+         */
+        static bool isValidURL_Regex(const std::string& path);
+
+
+        /**
+         * This method adds the fallowing metadata from the URL html page:
+         * Link to page.
+         * Name of author.
+         * Headline.
+         * Publish date.
+         * Publisher information.
+         * @param html  the oroginal URL html page.
+         * @param artical the file to add to the meta data.
+         */
+        static void addMetaData(const std::string* html, std::ofstream* artical);
+        /**
+         * This method adds the fallowing metadata from the URL html page:
+         * Link to page.
+         * Name of author.
+         * Headline.
+         * Publish date.
+         * Publisher information.
+         * @param html the oroginal URL html page.
+         * @param artical the Article obj to add to it the meta data.
+         */
+        static void addMetaData(const std::string* html, ArticalProcessing::Artical& artical);
+
+
+        /**
+         * all of the code bellow is to create static regex
          * that will be created once in the program's static initialization phase,
          * and will be saved during the running of any program that will include this class.
-         *
+         */
+
+        /**
+         * Regex constants used in the class
+         */
+        inline static const std::regex PROTOCOL_REGEX{"^https?://"};
+        inline static const std::regex AUTHOR_REGEX{
+            "\"author\":\\s*\\{[\\s\\S]*?\"name\":\\s*?\"([^\"]*)\"[\\s\\S]*?\\}"
+        };
+        inline static const std::regex HEADLINE_REGEX{"<title[\\s\\S]*?>([\\s\\S]*?)</title>"};
+        inline static const std::regex DATE_REGEX{"\"datePublished\":\\s*?\"([\\s\\S]*?)\""};
+        inline static const std::regex PUBLISHER_REGEX{R"("publisher": \{[\s\S]*?\})"}; //the news media that published
+
+
+        inline static const std::regex MAIN_ARTICLE_TEXT_REGEX{
+            R"(((<p>|<p\s).*?</p>)|(<span data-text="true">(.*?)</span>))"
+        };
+        inline static const string META_DATA_HTML_TAG_START = "<script type=\"application/ld+json\">\n{";
+        inline static const string META_DATA_HTML_TAG_END = "}</script>";
+
+
+        /**
          * The regex that will be used later to remove all these bellow tags
          * from the text extracted from the html downloaded.
          *

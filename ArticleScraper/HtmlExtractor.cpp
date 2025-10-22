@@ -4,168 +4,156 @@
 
 #include "HtmlExtractor.h"
 
+#include "../Util/FileUtil.h"
+#include "../Util/StringUtil.h"
+
 
 namespace ArticalScraper
 {
-# define MAX_PATH_LENGTH 95
 
-    /**
-     *  This method replaces all problomatic chars in a URL path so it will be able to be used as a file path in windows.
-     * @param path the URL.
-     * @return a URL that can be used as a path in windows OS (and any other).
-     */
-    std::string convet_URL_to_valid_path(const std::string& path)
+    HtmlExtractor::HtmlExtractor()
     {
-        std::regex protocol("^https?://");
-        std::regex invalid_chars(R"([%/:*?"<>|\\])"); // All problematic characters
+      setCurl();
+    }
 
-        std::string augmentedString = std::regex_replace(path, protocol, "");
-        augmentedString = std::regex_replace(augmentedString, invalid_chars, "_");
+    HtmlExtractor::~HtmlExtractor()
+    {
+        curl_easy_cleanup(curl_);
+    }
 
-        // Clean up multiple underscores
-        std::regex multiple_underscores("_+");
-        augmentedString = std::regex_replace(augmentedString, multiple_underscores, "_");
-
-        if (augmentedString.length() > MAX_PATH_LENGTH)
+    void HtmlExtractor::setCurl()
+    {
+        curl_ = curl_easy_init();
+        if (!curl_)
         {
-            augmentedString = augmentedString.substr(0,MAX_PATH_LENGTH);
+            throw std::runtime_error("failed to initialize curl");
         }
+        //Transparent User-Agent to aprove scrape
+        curl_easy_setopt(curl_, CURLOPT_USERAGENT,
+                         "Article view (Educational Purpose student in huji: Contact: yitzkoel@gmail.com)");
 
-        return augmentedString + ".html";
+        //Setting up the handle
+        curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, fwrite);
+        curl_easy_setopt(curl_, CURLOPT_SSL_OPTIONS, CURLSSLOPT_NATIVE_CA);
+
+        // Set a 10-second timeout for the connection phase
+        curl_easy_setopt(curl_, CURLOPT_CONNECTTIMEOUT, 10L);
+
+        // Set a 30-second total timeout for the entire request
+        curl_easy_setopt(curl_, CURLOPT_TIMEOUT, 30L);
+
+        /**
+         * PERFORMANCE OPTIONS OPTIMIZATION
+        */
+
+        // Enable TCP Keepalive
+        curl_easy_setopt(curl_, CURLOPT_TCP_KEEPALIVE, 1L);
+
+        // Disable Nagle's algorithm for lower latency
+        curl_easy_setopt(curl_, CURLOPT_TCP_NODELAY, 1L);
+
+        // Try to use HTTP/2
+        curl_easy_setopt(curl_, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
+
+        // Disable the progress meter, as it's not needed for API calls
+        curl_easy_setopt(curl_, CURLOPT_NOPROGRESS, 1L);
+
+        // Use the default CA bundle
+        curl_easy_setopt(curl_, CURLOPT_SSL_OPTIONS, CURLSSLOPT_NATIVE_CA);
+
+        // Allow libcurl to reuse connections
+        curl_easy_setopt(curl_, CURLOPT_FORBID_REUSE, 0L);
+
+        // Allow compression requests
+        curl_easy_setopt(curl_, CURLOPT_ACCEPT_ENCODING, "");
     }
 
-    /**
-     *
-     * @param path The URL path to be downloaded artical from.
-     * This method checks that the path prefix is valid for the curl setting.
-     * @return bool of result.
-     */
-    bool isValidURL_Regex(const std::string& path)
+    bool HtmlExtractor::isValidURL_Regex(const std::string& path)
     {
-        std::regex protocol("^https?://");
-        return std::regex_search(path, protocol);
+        return std::regex_search(path, PROTOCOL_REGEX);
     }
 
-
-    /**
-     * This method adds the fallowing metadata from the URL html page:
-     * Link to page.
-     * Name of author.
-     * Headline.
-     * Publish date.
-     * Publisher information.
-     * @param html  the oroginal URL html page.
-     * @param artical the file to add to the meta data.
-     */
-    void addMetaData(const std::string* html, std::ofstream* artical)
+    void HtmlExtractor::addMetaData(const std::string* html, std::ofstream* artical)
     {
         // Adding the header to JSON meta data
-        *artical << "<script type=\"application/ld+json\">\n{";
+        *artical << META_DATA_HTML_TAG_START;
         std::smatch m;
 
         // Add link to page
         *artical << "<a href= " + (*html).substr(0, (*html).find('\n')) + ">link to full website artical</a>\n";
 
-        std::regex author(R"("author": \{[\s\S]*?\})");
-        if (std::regex_search(*html, m, author))
+        // Add author
+        if (std::regex_search(*html, m, AUTHOR_REGEX))
         {
             *artical << m[0] << "\n";
         }
 
         // Add headline
-        std::regex headline(R"("headline": "[\s\S]*?")");
-        if (std::regex_search(*html, m, headline))
+        if (std::regex_search(*html, m, HEADLINE_REGEX))
         {
             *artical << m[0] << "\n";
         }
 
         //Add Publishing date
-        std::regex date(R"("datePublished": "[\s\S]*?")");
-        if (std::regex_search(*html, m, date))
+        if (std::regex_search(*html, m, DATE_REGEX))
         {
             *artical << m[0] << "\n";
         }
 
         // Add publisher data
-        std::regex publisher(R"("publisher": \{[\s\S]*?\})"); //the news media that published
-        if (std::regex_search(*html, m, publisher))
+        if (std::regex_search(*html, m, PUBLISHER_REGEX))
         {
             *artical << m[0] << "\n";
         }
 
         // Close meta data JSON header
-        *artical << "}</script>";
+        *artical << META_DATA_HTML_TAG_END;
     }
 
-    /**
-     * This method adds the fallowing metadata from the URL html page:
-     * Link to page.
-     * Name of author.
-     * Headline.
-     * Publish date.
-     * Publisher information.
-     * @param html the oroginal URL html page.
-     * @param artical the Article obj to add to it the meta data.
-     */
-    void addMetaData(const std::string* html, ArticalProcessing::Artical& artical)
+    void HtmlExtractor::addMetaData(const std::string* html, ArticalProcessing::Artical& artical)
     {
         std::smatch m;
 
         // Add link to page
         artical.set_URLlink((*html).substr(0, (*html).find('\n')));
 
-        std::regex author("\"author\":\\s*\\{[\\s\\S]*?\"name\":\\s*?\"([^\"]*)\"[\\s\\S]*?\\}");
         // Add author
-        if (std::regex_search(*html, m, author))
+        if (std::regex_search(*html, m, AUTHOR_REGEX))
         {
             artical.set_name_of_auther(m[1]);
         }
 
         // Add headline
-        std::regex headline("<title[\\s\\S]*?>([\\s\\S]*?)</title>");
-        if (std::regex_search(*html, m, headline))
+        if (std::regex_search(*html, m, HEADLINE_REGEX))
         {
             artical.set_headline(m[1]);
         }
 
         // Add Publishing date
-        std::regex date("\"datePublished\":\\s*?\"([\\s\\S]*?)\"");
-        if (std::regex_search(*html, m, date))
+        if (std::regex_search(*html, m, DATE_REGEX))
         {
             artical.set_publish_date(m[1]);
         }
 
         // Add publisher data
-        std::regex publisher(R"("publisher": \{[\s\S]*?\})"); //the news media that published
-        if (std::regex_search(*html, m, publisher))
+        if (std::regex_search(*html, m, PUBLISHER_REGEX))
         {
             artical.set_publisher_data(m[0]);
         }
     }
 
-
-
-    std::string HtmlExtractor::websiteDownloader(const std::string& path)
+    std::string HtmlExtractor::websiteDownloader(const std::string& path) const
     {
-        CURL* curl = curl_easy_init();
-        if (!curl)
-        {
-            throw std::runtime_error("failed to initialize curl");
-        }
-
         if (!isValidURL_Regex(path))
         {
-            curl_easy_cleanup(curl);
             throw std::invalid_argument("URL must include http or https prefix");
         }
 
-
-        std::string filePath = convet_URL_to_valid_path(path);
+        std::string filePath = Util::StringUtil::convet_URL_to_valid_path(path);
         FILE* file = fopen(filePath.c_str(), "wb");
 
         if (!file)
         {
-            curl_easy_cleanup(curl);
             throw std::ios_base::failure("Failed to open file for writing: " + filePath);
         }
 
@@ -173,29 +161,20 @@ namespace ArticalScraper
         std::string link = path + "\n";
         fputs(link.c_str(), file);
 
-        //Transparent User-Agent to aprove scrape
-        curl_easy_setopt(curl, CURLOPT_USERAGENT,
-                         "Article view (Educational Purpose student in huji: Contact: yitzkoel@gmail.com)");
-
         //Setting up the handle
-        curl_easy_setopt(curl, CURLOPT_URL, path.c_str());
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, fwrite);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, file);
+        curl_easy_setopt(curl_, CURLOPT_URL, path.c_str());
+        curl_easy_setopt(curl_, CURLOPT_WRITEDATA, file);
 
-
-        curl_easy_setopt(curl, CURLOPT_SSL_OPTIONS, CURLSSLOPT_NATIVE_CA);
-
-        CURLcode result = curl_easy_perform(curl);
+        CURLcode result = curl_easy_perform(curl_);
 
         if (result != CURLE_OK)
         {
-            curl_easy_cleanup(curl);
             fclose(file);
             std::string err = std::string("CURL error: ") + curl_easy_strerror(result);
             throw std::runtime_error(err + " " + path);
         }
 
-        curl_easy_cleanup(curl);
+        //close file
         fclose(file);
 
         return filePath;
@@ -220,12 +199,9 @@ namespace ArticalScraper
         //Add metadata in JSON to artical
         addMetaData(&html, &artical);
 
-        // Regex for main artical text blocks
+        // Regex search of main artical text blocks
         std::smatch m;
-        std::regex pattern(R"(((<p>|<p class="article_speakable">)(.*?)</p>)|(<span data-text="true">(.*?)</span>))");
-
-
-        while (std::regex_search(html, m, pattern))
+        while (std::regex_search(html, m, MAIN_ARTICLE_TEXT_REGEX))
         {
             std::string inner_text;
             if (m[3].matched) // <p> branch matched
@@ -270,9 +246,8 @@ namespace ArticalScraper
 
         // Regex for main artical text blocks
         std::smatch m;
-        std::regex pattern(R"(((<p>|<p\s).*?</p>)|(<span data-text="true">(.*?)</span>))");
 
-        while (std::regex_search(html, m, pattern))
+        while (std::regex_search(html, m, MAIN_ARTICLE_TEXT_REGEX))
         {
             std::string inner_text;
             if (m[1].matched) // <p> branch matched

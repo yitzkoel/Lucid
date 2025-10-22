@@ -22,6 +22,13 @@ namespace Util::StringUtil
   * @param to The replacement string.
   */
     void replaceAll(std::string& str, const std::string& from, const std::string& to) ;
+
+    /**
+     *  This method replaces all problomatic chars in a URL path so it will be able to be used as a file path in windows.
+     * @param path the URL.
+     * @return a URL that can be used as a path in windows OS (and any other).
+     */
+    std::string convet_URL_to_valid_path(const std::string& path);
 }
 
 #endif //STRINGUTIL_H
