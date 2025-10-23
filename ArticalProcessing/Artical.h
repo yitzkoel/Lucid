@@ -14,7 +14,6 @@
  *
  * And A class ArticleHtmlDesighner that gets a article object and is able to create a html file to represent that article.
  *
- * @note  **IMPORTANT ASSUMPTIONS** The articl desighner assumes that
  */
 namespace ArticalProcessing {
     /**

@@ -101,10 +101,10 @@ namespace UserInterface
         void setExit(bool exit) { shouldExit_ = exit; }
 
         /**
-         *  Returns a raw pointer to article.
+         *  Returns a shared_ptr to article.
          * @return The cur article in the shell.
          */
-        ArticalProcessing::Artical& getArtical() { return *artical_; }
+        std::shared_ptr<ArticalProcessing::Artical> getArtical() { return artical_; }
 
         /**
          * This func trys to execute the command givin to it with the arguments givin to it.

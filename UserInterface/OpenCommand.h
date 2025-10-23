@@ -5,6 +5,7 @@
 #ifndef OPENCOMMAND_H
 #define OPENCOMMAND_H
 #include "Command.h"
+#include "../ArticalProcessing/ArticalHtmlDesigner.h"
 
 namespace UserInterface
 {
@@ -14,11 +15,16 @@ namespace UserInterface
     class OpenCommand : public Command
     {
     public:
-        explicit OpenCommand(std::shared_ptr<Shell>& shell): Command(shell)
+        explicit OpenCommand(std::shared_ptr<Shell>& shell):
+            Command(shell),
+            designer_(std::make_unique<ArticalProcessing::ArticalHtmlDesigner>())
         {
         }
 
         void execute(std::string arg) override;
+
+    private:
+        std::unique_ptr<ArticalProcessing::ArticalHtmlDesigner> designer_;
     };
 } // UserInterface
 

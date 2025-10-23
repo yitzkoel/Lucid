@@ -58,11 +58,29 @@ namespace ArticalProcessing
      * according to specefecation or a default html file that include all the data in the artical object.
      *
      * @note **IMPORTANT ASSUMPTION** This class assumes you have a articalTemplateHtml.html file in the .exe directory.
+     * @note **IMPORTANT** this class gives default setting to hebrew layout (direction of html page and so on).
      *
      */
     class ArticalHtmlDesigner
     {
     public:
+        /**
+        *  This is a contructor to the desighner.
+        *  it will be initalized to a default state of hebrew language and right to left and all flags turned off.
+        * @param artical The artical obj to create the html from.
+        */
+        explicit ArticalHtmlDesigner(std::shared_ptr<Artical> artical);
+
+        ArticalHtmlDesigner();
+
+        /**
+         * This method resets the desighner with a bew article.
+         *
+         * @param artical The new article to load into the designer
+         */
+        void reset(std::shared_ptr<Artical> artical);
+
+
         // The add functions bellow turn on a flag that will be used when generating a html file.
         void addTitle();
         void addPublishTime();
@@ -76,7 +94,7 @@ namespace ArticalProcessing
          *  This method lets the user control what path the html generated will have.
          * @param path the path to the generated html page to be created
          */
-        void setPath(std::string& path);
+        void setPath(std::string path);
         /**
          *  This method lets the user control the languge of the page and the direction of the text layout.
          * @param dir the direction of the text on page (right to left or vice versa).
@@ -84,26 +102,25 @@ namespace ArticalProcessing
          */
         void setLanguage(Dir dir, Language lng);
 
-        /**
-         *  This is a contructor to the desighner.
-         *  it will be initalized to a default state of hebrew language and right to left and all flags turned off.
-         * @param artical The artical obj to create the html from.
-         */
-        explicit ArticalHtmlDesigner(Artical& artical);
-
 
         /**
          * This method creates a html file according to user prefrences.
          * @return The path to the html file created.
          */
-        [[nodiscard]] std::string generateHtmlFile();
+        std::string generateHtmlFile();
 
 
         /**
          * Create a default layout with will be all the fields desplayed on the page.
         * @return The path to the html file created..
          */
-        [[nodiscard]] std::string generateDefaultHtmlFile();
+        std::string generateDefaultHtmlFile();
+
+        /**
+         *
+         * @return
+         */
+        std::string getPath(){return articalPath_;}
 
     private:
         /**
@@ -113,19 +130,19 @@ namespace ArticalProcessing
         inline static string DIRECTION_TEMPLATE = "{{direction}}";
         inline static string TITLE_TEMPLATE = "{{title}}";
         inline static string PUBLISH_TIME_TEMPLATE = "{{publishTime}}";
-        inline static string AUTHOR_TEMPLATE = "{{author}}";
+        inline static string AUTHOR_TEMPLATE = "{{author name}}";
         inline static string URL_LINK_TEMPLATE = "{{URLlink}}";
         inline static string ARTICLE_TEXT_TEMPLATE = "{{articalText}}";
         inline static string LLM_ANSWER_TEMPLATE = "{{LLM answers}}";
 
 
-        Artical artical_; // The article to be geneated into a html file.
-        std::string articalPath_; //The path in Lucid directory to create the Html page.
+        std::shared_ptr<Artical> artical_; // The article to be geneated into a html file.
+        std::string articalPath_; //a valid path with the file name to create in the html file.
         Dir dir_; // direction setting in html.
         Language lng_; // language setting in html.
 
         //Flags to indicate to the class obj if to add the listed part to the final html
-        bool title_, publishTime_, publisherData_, articleText_, URLlink_, author_, LLMRequests_;
+        bool title_{}, publishTime_{}, publisherData_{}, articleText_{}, URLlink_{}, author_{}, LLMRequests_{};
 
 
         /**

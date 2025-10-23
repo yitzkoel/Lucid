@@ -4,7 +4,7 @@
 
 #include "StringUtil.h"
 
-#include <bits/regex.h>
+#include <regex>
 
 
 namespace Util::StringUtil

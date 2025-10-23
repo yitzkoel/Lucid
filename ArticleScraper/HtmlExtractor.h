@@ -59,7 +59,7 @@ namespace ArticalScraper
         [[nodiscard]] std::string websiteDownloader(const std::string& path) const;
 
         /**
-         * This methods recieves a raw html in a txt file of a artical and removes all unessecery text
+         * This methods recieves a path to a raw html in a txt file of a artical and removes all unessecery text
          * And saves it in the given path.
          *
          * It keeps the fallowing data (in this order):
@@ -83,7 +83,7 @@ namespace ArticalScraper
         static std::string htmlDataExtractorToFile(const std::string& path);
 
         /**
-         * This methods recieves a raw html in a txt file of a article and creates a article obj that holds all
+         * This methods recieves  a path to a raw html in a txt file of a article and creates a article obj that holds all
          * important information on the article.
          * It keeps the fallowing data :
          *
@@ -156,8 +156,15 @@ namespace ArticalScraper
 
 
         inline static const std::regex MAIN_ARTICLE_TEXT_REGEX{
-            R"(((<p>|<p\s).*?</p>)|(<span data-text="true">(.*?)</span>))"
-        };
+         R"(((<p>|<p\s).*?</p>)|(<span data-text="true">(.*?)</span>))"
+             };
+     //R"(((<p>|<p\s).*?</p>)|(<span data-text="true">(.*?)</span>))"
+      //
+     //R"(((<p>|<p[\s\S]*?>)([\s\S].*?)</p>)|(<span data-text="true">(.*?)</span>))"
+         // need to add to wesites that have the text inside some hava script in this format:
+          // add &quot;articleBody&quot;:(.*?)&quot;,  - it looks inside javascript that holds text inside article body
+         // can also add the version "articleBody":(.*?)",
+         // and with look ahead will look like "articleBody&quot;:&quot;(.*?)(?=&quot;,&quot;)"
         inline static const string META_DATA_HTML_TAG_START = "<script type=\"application/ld+json\">\n{";
         inline static const string META_DATA_HTML_TAG_END = "}</script>";
 

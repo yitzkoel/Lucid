@@ -18,11 +18,18 @@ namespace UserInterface {
             std::cout << "No article to analize (hint input: load \"URL\" )";
             return;
         }
-        ArticalProcessing::ArticalHtmlDesigner designer(shell_->getArtical());
-        if(shell_->hasAnalysisEnabled()) designer.addLLMRequests();
-        std::string htmlPath = designer.generateDefaultHtmlFile();
+        //set article designer_
+        designer_->reset(shell_->getArtical());
+        if(shell_->hasAnalysisEnabled()) designer_->addLLMRequests();
+
+        //generate html file in default directory 'htmlPath'
+        std::string htmlPath = designer_->generateDefaultHtmlFile();
+
+
+        //Open default browser
         std::string cmd = "start \"\" \"" + htmlPath + "\"";
         std::system(cmd.c_str());
+
         // wait a bit before deleting to make sure it opens correctly
         std::this_thread::sleep_for(std::chrono::seconds(2));
         Util::FileUtil::deleteFile(htmlPath);

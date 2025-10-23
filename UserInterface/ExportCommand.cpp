@@ -18,10 +18,23 @@ namespace UserInterface {
             return;
         }
 
-        ArticalProcessing::ArticalHtmlDesigner designer(shell_->getArtical());
-        if(shell_->hasAnalysisEnabled()) designer.addLLMRequests();
-        std::string htmlPath = designer.generateDefaultHtmlFile();
-        Util::FileUtil::copyFile(htmlPath, arg);
-        Util::FileUtil::deleteFile(htmlPath);
+        //Util::StringUtil::replaceAll(arg,"\\","/");
+
+
+        //Reset the article
+        designer_->reset(shell_->getArtical());
+
+        //add Analysis if needed
+        if(shell_->hasAnalysisEnabled()) designer_->addLLMRequests();
+
+        //Add To current file name the path provided
+        std::string nameOfFile = designer_->getPath();
+        designer_->setPath(arg + "\\" + nameOfFile);
+
+        //Generate the html file in the wanted path
+        designer_->generateDefaultHtmlFile();
+
+        //reset the path of the file to the curent directory
+        designer_->setPath(nameOfFile);
     }
 } // UserInterface

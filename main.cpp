@@ -2,7 +2,7 @@
 #include <memory>
 #include "ArticleScraper/HtmlExtractor.h"
 #include "UserInterface/Shell.h"
-#include "Tests/tests.cpp"
+//#include "Tests/tests.cpp"     ********TODO**********
 
 
 int main(int argc, char* argv[])
@@ -19,6 +19,11 @@ int main(int argc, char* argv[])
     // _setmode(_fileno(stdout), _O_U8TEXT);
     //
     // return test_LLM_response_To_Article(argc, argv);
+
+
+
+
+
 
     // GLOBAL INITIALIZATION (Call ONCE at program start)
     CURLcode init_res = curl_global_init(CURL_GLOBAL_DEFAULT);

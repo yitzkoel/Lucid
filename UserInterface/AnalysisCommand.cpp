@@ -32,13 +32,13 @@ namespace UserInterface
             return;
         }
 
-        ArticalProcessing::Artical& artical = shell_->getArtical();
+        auto artical = shell_->getArtical();
 
         LLM::Request request = LLM::Request(REQUEST,
-                            artical.getArticleText(),
+                            artical->getArticleText(),
                             REQUEST_TITLE, *client_);
 
-        artical.addRequest(request);
+        artical->addRequest(request);
         shell_->setAnalysis(true);
         shell_->setGeneratedAnalysis(true);
     }

@@ -73,8 +73,11 @@
 
     <div class="container">
         <main class="content">
-            {{articalText}}
-        </main>
+			{{articalText}}
+			<section class="ai-response">
+				<h2>Open AI generated Commentary</h2> <p>{{LLM answers}}</p>
+			</section>
+		</main>
     </div>
 
     <footer>

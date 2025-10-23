@@ -241,24 +241,24 @@ namespace ArticalScraper
         buffer << html_page.rdbuf();
         std::string html = buffer.str();
 
-        //Add metadata in JSON to artical
+        //Add metadata artical obj (meta data is all data that is not the article text itself)
         addMetaData(&html, *artical);
 
         // Regex for main artical text blocks
         std::smatch m;
 
-        while (std::regex_search(html, m, MAIN_ARTICLE_TEXT_REGEX))
-        {
-            std::string inner_text;
-            if (m[1].matched) // <p> branch matched
-                inner_text = m[1].str();
-            else if (m[4].matched) // <span> branch matched
-                inner_text = m[4].str();
-            artical->addTextToArtical("<p>" + inner_text + "</p>");
-            html = m.suffix().str();
-        }
+         while (std::regex_search(html, m, MAIN_ARTICLE_TEXT_REGEX))
+         {
+             std::string inner_text;
+             if (m[1].matched) // <p> branch matched
+                 inner_text = m[1].str();
+             else if (m[4].matched) // <span> branch matched
+                 inner_text = m[4].str();
+             artical->addTextToArtical("<p>" + inner_text + "</p>");
+             html = m.suffix().str();
+         }
 
-        // Remove all unwanted Tags look at h file to understand which tags were removed.
+        // Remove all unwanted Tags look at HtmlExtractor.h file to understand which tags were removed.
         artical->set_article_text(std::regex_replace(artical->getArticleText(), tags, ""));
 
         //safe close and renaming of reformated artical

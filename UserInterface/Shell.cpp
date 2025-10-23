@@ -45,6 +45,10 @@ namespace UserInterface {
         {
             std::cerr << e.what() << "\n";
         }
+        catch (const std::ios_base::failure& e)
+        {
+            std::cerr << e.what() << "\n";
+        }
         catch (const std::exception& e)
         {
             std::cerr << e.what() << "\n";

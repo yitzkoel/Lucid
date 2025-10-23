@@ -7,7 +7,7 @@
 #include <utility>
 
 # define MAX_PATH_LENGTH 95
-# define HTML_TEMPLATE_PATH "articalTemplateHtml.txt"
+# define HTML_TEMPLATE_PATH "articalTemplateHtml"
 
 
 namespace ArticalProcessing {
@@ -19,8 +19,8 @@ namespace ArticalProcessing {
     const Dir Dir::LTR = Dir("ltr");
     const Dir Dir::RTL = Dir("rtl");
 
-    ArticalHtmlDesigner::ArticalHtmlDesigner(Artical& artical):
-    artical_(artical),
+    ArticalHtmlDesigner::ArticalHtmlDesigner(std::shared_ptr<Artical> artical):
+    artical_(std::move(artical)),
     title_(false),
     publisherData_(false),
     publishTime_(false),
@@ -32,8 +32,14 @@ namespace ArticalProcessing {
     lng_(Language::HEB)
 
         {
-            articalPath_ = Util::StringUtil::convet_URL_to_valid_path(this->artical_.getURLlink());
+            articalPath_ = Util::StringUtil::convet_URL_to_valid_path(this->artical_->getURLlink());
         }
+
+    ArticalHtmlDesigner::ArticalHtmlDesigner():
+    dir_(Dir::RTL),
+    lng_(Language::HEB)
+    {
+    }
 
 
 
@@ -52,7 +58,7 @@ namespace ArticalProcessing {
     void ArticalHtmlDesigner::addLLMRequests(){LLMRequests_ = true;}
 
 
-    void ArticalHtmlDesigner::setPath(std::string& path){articalPath_ = path;}
+    void ArticalHtmlDesigner::setPath(std::string path){articalPath_ = std::move(path);}
 
     void ArticalHtmlDesigner::setLanguage(Dir dir, Language lng)
     {
@@ -95,19 +101,19 @@ namespace ArticalProcessing {
             }
 
             if(addTemplate(line, TITLE_TEMPLATE,title_,
-                artical_.getHeadline(), htmlArticalBuffer)) continue;
+                artical_->getHeadline(), htmlArticalBuffer)) continue;
 
             if(addTemplate(line, PUBLISH_TIME_TEMPLATE,publishTime_,
-                artical_.getPublishDate(), htmlArticalBuffer)) continue;
+                artical_->getPublishDate(), htmlArticalBuffer)) continue;
 
             if(addTemplate(line, AUTHOR_TEMPLATE,author_,
-                artical_.getAuthor(), htmlArticalBuffer)) continue;
+                artical_->getAuthor(), htmlArticalBuffer)) continue;
 
             if(addTemplate(line, URL_LINK_TEMPLATE,URLlink_,
-                artical_.getURLlink(), htmlArticalBuffer)) continue;
+                artical_->getURLlink(), htmlArticalBuffer)) continue;
 
             if(addTemplate(line, ARTICLE_TEXT_TEMPLATE,articleText_,
-                artical_.getArticleText(), htmlArticalBuffer)) continue;
+                artical_->getArticleText(), htmlArticalBuffer)) continue;
 
             if(addTemplate(line, LLM_ANSWER_TEMPLATE,LLMRequests_,
                 llmRequests, htmlArticalBuffer)) continue;
@@ -127,7 +133,7 @@ namespace ArticalProcessing {
         std::ifstream htmlTemplateFile(HTML_TEMPLATE_PATH);
         if(!htmlArtical || !htmlTemplateFile)
         {
-            throw std::ios_base::failure("Failed to open file for writing: ");
+            throw std::ios_base::failure("Failed to open file for writing, bad path\n");
         }
 
        // create buffer to create the file
@@ -153,19 +159,19 @@ namespace ArticalProcessing {
 
 
             if(addTemplate(line, TITLE_TEMPLATE,true,
-                artical_.getHeadline(), htmlArticalBuffer)) continue;
+                artical_->getHeadline(), htmlArticalBuffer)) continue;
 
             if(addTemplate(line, PUBLISH_TIME_TEMPLATE,true,
-                artical_.getPublishDate(), htmlArticalBuffer)) continue;
+                artical_->getPublishDate(), htmlArticalBuffer)) continue;
 
             if(addTemplate(line, AUTHOR_TEMPLATE,true,
-                artical_.getAuthor(), htmlArticalBuffer)) continue;
+                artical_->getAuthor(), htmlArticalBuffer)) continue;
 
             if(addTemplate(line, URL_LINK_TEMPLATE,true,
-                artical_.getURLlink(), htmlArticalBuffer)) continue;
+                artical_->getURLlink(), htmlArticalBuffer)) continue;
 
             if(addTemplate(line, ARTICLE_TEXT_TEMPLATE,true,
-                artical_.getArticleText(), htmlArticalBuffer)) continue;
+                artical_->getArticleText(), htmlArticalBuffer)) continue;
 
             if(addTemplate(line, LLM_ANSWER_TEMPLATE,LLMRequests_,
                 llmRequests, htmlArticalBuffer)) continue;
@@ -176,6 +182,22 @@ namespace ArticalProcessing {
         dumpVecBuffer(htmlArtical, htmlArticalBuffer);
         // Return path to artical.
         return  articalPath_;
+    }
+
+
+
+    void ArticalHtmlDesigner::reset(std::shared_ptr<Artical> artical)
+    {
+        artical_ = std::move(artical);
+        title_ = false;
+        publisherData_ = false;
+        URLlink_ = false;
+        articleText_ = false;
+        author_ = false;
+        LLMRequests_ = false;
+        dir_ = Dir::RTL;
+        lng_ = Language::HEB;
+        articalPath_ = Util::StringUtil::convet_URL_to_valid_path(this->artical_->getURLlink());
     }
 
     void ArticalHtmlDesigner::dumpVecBuffer(std::ofstream& htmlArtical, const std::vector<std::string>& htmlArticalBuffer)
@@ -189,7 +211,7 @@ namespace ArticalProcessing {
     std::string ArticalHtmlDesigner::createRequests()
     {
         std::string fullRequest;
-        auto requests = artical_.getRequests();
+        auto requests = artical_->getRequests();
         for(const LLM::Request& request: requests)
         {
             fullRequest +=
