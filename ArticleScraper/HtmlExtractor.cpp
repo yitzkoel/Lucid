@@ -110,7 +110,7 @@ namespace ArticalScraper
         *artical << META_DATA_HTML_TAG_END;
     }
 
-    void HtmlExtractor::addMetaData(const std::string* html, ArticalProcessing::Artical& artical)
+    void HtmlExtractor::addMetaData(const std::string* html, ArticleProcessing::Article& artical)
     {
         std::smatch m;
 
@@ -226,9 +226,9 @@ namespace ArticalScraper
         return path;
     }
 
-    std::unique_ptr<ArticalProcessing::Artical> HtmlExtractor::htmlDataExtractorToArtical(const std::string& path)
+    std::unique_ptr<ArticleProcessing::Article> HtmlExtractor::htmlDataExtractorToArtical(const std::string& path)
     {
-        auto artical = std::make_unique<ArticalProcessing::Artical>();
+        auto artical = std::make_unique<ArticleProcessing::Article>();
         std::ifstream html_page(path);
 
         if (!html_page)

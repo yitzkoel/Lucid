@@ -9,7 +9,7 @@ namespace UserInterface {
     void LoadCommand::execute(std::string arg)
     {
         std::string path = htmlExtractor->websiteDownloader(arg);
-        std::unique_ptr<ArticalProcessing::Artical> artical = htmlExtractor->htmlDataExtractorToArtical(path);
+        std::unique_ptr<ArticleProcessing::Article> artical = htmlExtractor->htmlDataExtractorToArtical(path);
 
         shell_->setArtical(artical);
 

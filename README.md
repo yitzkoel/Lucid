@@ -87,7 +87,7 @@ Here are some potential improvements and ideas for the future:
 If you have any questions or suggestions, feel free to reach out.
 
 -   **Email**: yitzkoel@gmail.com
--   **LinkedIn**: (Add your link here when ready)
+-   **LinkedIn**: www.linkedin.com/in/yitzhak-koelewyn
 
 ## License
 

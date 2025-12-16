@@ -2,7 +2,7 @@
 // Created by yitzk on 9/8/2025.
 //
 
-#include "ArticalHtmlDesigner.h"
+#include "ArticleHtmlDesigner.h"
 
 #include <utility>
 
@@ -10,7 +10,7 @@
 # define HTML_TEMPLATE_PATH "articalTemplateHtml"
 
 
-namespace ArticalProcessing {
+namespace ArticleProcessing {
 
     // creating the const objects for Direction and Language.
     const Language Language::EN = Language("en");
@@ -19,7 +19,7 @@ namespace ArticalProcessing {
     const Dir Dir::LTR = Dir("ltr");
     const Dir Dir::RTL = Dir("rtl");
 
-    ArticalHtmlDesigner::ArticalHtmlDesigner(std::shared_ptr<Artical> artical):
+    ArticalHtmlDesigner::ArticalHtmlDesigner(std::shared_ptr<Article> artical):
     artical_(std::move(artical)),
     title_(false),
     publisherData_(false),
@@ -186,7 +186,7 @@ namespace ArticalProcessing {
 
 
 
-    void ArticalHtmlDesigner::reset(std::shared_ptr<Artical> artical)
+    void ArticalHtmlDesigner::reset(std::shared_ptr<Article> artical)
     {
         artical_ = std::move(artical);
         title_ = false;
@@ -238,5 +238,5 @@ namespace ArticalProcessing {
     }
 
 
-} // ArticalProcessing
+} // ArticleProcessing
 

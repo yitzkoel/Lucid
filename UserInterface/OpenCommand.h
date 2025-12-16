@@ -17,14 +17,14 @@ namespace UserInterface
     public:
         explicit OpenCommand(std::shared_ptr<Shell>& shell):
             Command(shell),
-            designer_(std::make_unique<ArticalProcessing::ArticalHtmlDesigner>())
+            designer_(std::make_unique<ArticleProcessing::ArticalHtmlDesigner>())
         {
         }
 
         void execute(std::string arg) override;
 
     private:
-        std::unique_ptr<ArticalProcessing::ArticalHtmlDesigner> designer_;
+        std::unique_ptr<ArticleProcessing::ArticalHtmlDesigner> designer_;
     };
 } // UserInterface
 

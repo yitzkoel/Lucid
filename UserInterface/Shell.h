@@ -92,7 +92,7 @@ namespace UserInterface
          *  This method sets up all setting to a new article to be handled by the shell.
          * @param artical the smart ptr to a article to be added to shell.
          */
-        void setArtical(std::unique_ptr<ArticalProcessing::Artical>& artical);
+        void setArtical(std::unique_ptr<ArticleProcessing::Article>& artical);
 
         /**
          * Sets the flag the shell uses to determine terminating the Lucid application.
@@ -104,7 +104,7 @@ namespace UserInterface
          *  Returns a shared_ptr to article.
          * @return The cur article in the shell.
          */
-        std::shared_ptr<ArticalProcessing::Artical> getArtical() { return artical_; }
+        std::shared_ptr<ArticleProcessing::Article> getArtical() { return artical_; }
 
         /**
          * This func trys to execute the command givin to it with the arguments givin to it.
@@ -159,7 +159,7 @@ namespace UserInterface
         /**
          * The current artical to proccess.
          */
-        std::shared_ptr<ArticalProcessing::Artical> artical_;
+        std::shared_ptr<ArticleProcessing::Article> artical_;
 
     };
 } // UserInterface

@@ -97,7 +97,7 @@ namespace ArticalScraper
          * @param path  the path to the downlaoded html file.
          * @return A path to the reformated file please note that it is the same path as the input path.
          */
-        static std::unique_ptr<ArticalProcessing::Artical> htmlDataExtractorToArtical(const std::string& path);
+        static std::unique_ptr<ArticleProcessing::Article> htmlDataExtractorToArtical(const std::string& path);
 
     private:
         CURL* curl_ = nullptr;
@@ -134,7 +134,7 @@ namespace ArticalScraper
          * @param html the oroginal URL html page.
          * @param artical the Article obj to add to it the meta data.
          */
-        static void addMetaData(const std::string* html, ArticalProcessing::Artical& artical);
+        static void addMetaData(const std::string* html, ArticleProcessing::Article& artical);
 
 
         /**

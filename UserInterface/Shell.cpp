@@ -20,7 +20,7 @@ namespace UserInterface {
         commands = CommandFactory::getCommands(shared_from_this());
     }
 
-    void Shell::setArtical(std::unique_ptr<ArticalProcessing::Artical>& artical)
+    void Shell::setArtical(std::unique_ptr<ArticleProcessing::Article>& artical)
     {
         artical_ = std::move(artical);
         hasArticalLoaded_ = true;

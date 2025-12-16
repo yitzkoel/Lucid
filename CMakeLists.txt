@@ -37,8 +37,8 @@ file(WRITE ${CMAKE_BINARY_DIR}/winfix.cpp
 add_executable(Lucid
         main.cpp
         ArticleScraper/HtmlExtractor.cpp
-        ArticalProcessing/ArticalHtmlDesigner.cpp
-        ArticalProcessing/Artical.cpp
+        ArticalProcessing/ArticleHtmlDesigner.cpp
+        ArticalProcessing/Article.cpp
         LLM/client.cpp
         LLM/Request.cpp
         Util/StringUtil.cpp

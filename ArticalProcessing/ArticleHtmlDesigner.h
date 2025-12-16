@@ -8,11 +8,11 @@
 #include <string>
 #include <utility>
 
-#include "Artical.h"
+#include "Article.h"
 #include "../ArticleScraper/HtmlExtractor.h"
 #include "../Util/StringUtil.h"
 
-namespace ArticalProcessing
+namespace ArticleProcessing
 {
     /**
      * This class represents the constants of direction in html tags.
@@ -69,7 +69,7 @@ namespace ArticalProcessing
         *  it will be initalized to a default state of hebrew language and right to left and all flags turned off.
         * @param artical The artical obj to create the html from.
         */
-        explicit ArticalHtmlDesigner(std::shared_ptr<Artical> artical);
+        explicit ArticalHtmlDesigner(std::shared_ptr<Article> artical);
 
         ArticalHtmlDesigner();
 
@@ -78,7 +78,7 @@ namespace ArticalProcessing
          *
          * @param artical The new article to load into the designer
          */
-        void reset(std::shared_ptr<Artical> artical);
+        void reset(std::shared_ptr<Article> artical);
 
 
         // The add functions bellow turn on a flag that will be used when generating a html file.
@@ -136,7 +136,7 @@ namespace ArticalProcessing
         inline static string LLM_ANSWER_TEMPLATE = "{{LLM answers}}";
 
 
-        std::shared_ptr<Artical> artical_; // The article to be geneated into a html file.
+        std::shared_ptr<Article> artical_; // The article to be geneated into a html file.
         std::string articalPath_; //a valid path with the file name to create in the html file.
         Dir dir_; // direction setting in html.
         Language lng_; // language setting in html.

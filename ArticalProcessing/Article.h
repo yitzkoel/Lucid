@@ -15,12 +15,12 @@
  * And A class ArticleHtmlDesighner that gets a article object and is able to create a html file to represent that article.
  *
  */
-namespace ArticalProcessing {
+namespace ArticleProcessing {
     /**
      * This class represents a Article.
      * It holds fields of the atrbutes of an artical and getters and setters.
      */
-    class Artical {
+    class Article {
 
     public:
         //
@@ -34,7 +34,7 @@ namespace ArticalProcessing {
          * @param publisherData Data about the publishers.
          * @param articleText The artical itself.
          */
-        Artical(
+        Article(
             std::string& URLlink,
             std::string& nameOfAuther,
             std::string& headline,
@@ -49,7 +49,7 @@ namespace ArticalProcessing {
             articleText(articleText) {}
 
         // default constructor
-        Artical() = default;
+        Article() = default;
         
 
         //setters
